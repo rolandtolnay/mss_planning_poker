@@ -1,17 +1,37 @@
-import 'package:either_dart/either.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
-import '../domain_error.dart';
-import 'models/user_entity.dart';
+import 'user_entity.dart';
 
 abstract class AuthRepository {
-  Future<Either<DomainError, List<UserEntity>>> fetchUsers();
+  Stream<UserEntity?> get onUserChanged;
+
+  Future<void> signInAnonymously();
+
+  Future<void> updateDisplayName(String name);
 }
 
 @Injectable(as: AuthRepository)
-class AuthRepositoryImpl implements AuthRepository {
+class FirAuthRepository implements AuthRepository {
+  final _auth = FirebaseAuth.instance;
+
   @override
-  Future<Either<DomainError, List<UserEntity>>> fetchUsers() async {
-    throw UnimplementedError();
+  Stream<UserEntity?> get onUserChanged {
+    return _auth.userChanges().map((user) {
+      if (user == null) return null;
+      return UserEntity(id: user.uid, displayName: user.displayName);
+    });
+  }
+
+  @override
+  Future<void> signInAnonymously() async {
+    await _auth.signInAnonymously();
+  }
+
+  @override
+  Future<void> updateDisplayName(String name) async {
+    assert(_auth.currentUser != null);
+
+    await _auth.currentUser?.updateDisplayName(name);
   }
 }

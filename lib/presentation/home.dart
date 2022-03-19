@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mss_planning_poker/domain/auth/user_entity.dart';
+
+import '../domain/auth/auth_repository.dart';
+import '../injectable/injectable.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -10,12 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
+  final _authRepository = getIt<AuthRepository>();
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _authRepository.signInAnonymously();
   }
 
   @override
@@ -25,23 +30,31 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: StreamBuilder<UserEntity?>(
+          stream: _authRepository.onUserChanged,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return Text('Error occured');
+            if (!snapshot.hasData) return CircularProgressIndicator();
+
+            final user = snapshot.data!;
+            return Column(
+              children: [
+                Text('User id: ${user.id}'),
+                if (user.displayName == null)
+                  Text('User has no name.')
+                else
+                  Text('User display name: ${user.displayName}.'),
+              ],
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        onPressed: () async {
+          await _authRepository.updateDisplayName('Roland');
+        },
+        tooltip: 'Set name',
+        child: const Icon(Icons.person),
       ),
     );
   }
