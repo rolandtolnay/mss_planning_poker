@@ -19,8 +19,8 @@ abstract class RoomRepository {
     required UserEntity admin,
   });
 
-  Future<Either<DomainError, RoomEntity>> joinRoom(
-    RoomEntity room, {
+  Future<Either<DomainError, RoomEntity>> joinRoom({
+    required String roomName,
     required UserEntity participant,
   });
 }
@@ -41,7 +41,6 @@ class FirRoomRepository implements RoomRepository {
     final doc = _ref.doc();
     final room = RoomEntity(
       id: doc.id,
-      name: '1234',
       participants: [RoomParticipantEntity.fromUser(admin)],
     );
     try {
@@ -54,8 +53,10 @@ class FirRoomRepository implements RoomRepository {
   }
 
   @override
-  Future<Either<DomainError, RoomEntity>> joinRoom(RoomEntity room,
-      {required UserEntity participant}) {
+  Future<Either<DomainError, RoomEntity>> joinRoom({
+    required String roomName,
+    required UserEntity participant,
+  }) {
     throw UnimplementedError();
   }
 }

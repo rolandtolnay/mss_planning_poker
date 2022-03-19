@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mss_planning_poker/domain/auth/user_entity.dart';
-import 'package:mss_planning_poker/domain/rooms/room_repository.dart';
 
 import '../domain/auth/auth_repository.dart';
+import '../domain/auth/user_entity.dart';
+import '../domain/rooms/models/room_entity.dart';
 import '../injectable/injectable.dart';
+import 'room_selector_dialog.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,6 +15,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _authRepository = getIt<AuthRepository>();
+
+  RoomEntity? _currentRoom;
 
   @override
   void initState() {
@@ -27,17 +28,29 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(_currentRoom?.name ?? 'mssPlanningPoker')),
       body: Center(
         child: StreamBuilder<UserEntity?>(
-          stream: _authRepository.onUserChanged,
+          stream: _authRepository.onAuthStateChanged,
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error occured');
             if (!snapshot.hasData) return CircularProgressIndicator();
 
             final user = snapshot.data!;
+
+            if (_currentRoom == null) {
+              WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                final room = await showDialog<RoomEntity>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => RoomSelectorDialog(),
+                );
+                setState(() {
+                  _currentRoom = room;
+                });
+              });
+            }
+
             return Column(
               children: [
                 const Spacer(),
@@ -48,24 +61,10 @@ class _HomePageState extends State<HomePage> {
                 else
                   Text('User display name: ${user.displayName}.'),
                 const Spacer(),
-                ElevatedButton(
-                  onPressed: () async {
-                    await getIt<RoomRepository>().createRoom(admin: user);
-                  },
-                  child: Text('Create room'),
-                ),
-                const Spacer(),
               ],
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await _authRepository.updateDisplayName('Roland');
-        },
-        tooltip: 'Set name',
-        child: const Icon(Icons.person),
       ),
     );
   }

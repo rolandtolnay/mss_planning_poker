@@ -4,7 +4,9 @@ import 'package:injectable/injectable.dart';
 import 'user_entity.dart';
 
 abstract class AuthRepository {
-  Stream<UserEntity?> get onUserChanged;
+  UserEntity? get currentUser;
+
+  Stream<UserEntity?> get onAuthStateChanged;
 
   Future<void> signInAnonymously();
 
@@ -16,8 +18,15 @@ class FirAuthRepository implements AuthRepository {
   final _auth = FirebaseAuth.instance;
 
   @override
-  Stream<UserEntity?> get onUserChanged {
-    return _auth.userChanges().map((user) {
+  UserEntity? get currentUser {
+    final firUser = _auth.currentUser;
+    if (firUser == null) return null;
+    return UserEntity(id: firUser.uid, displayName: firUser.displayName);
+  }
+
+  @override
+  Stream<UserEntity?> get onAuthStateChanged {
+    return _auth.authStateChanges().map((user) {
       if (user == null) return null;
       return UserEntity(id: user.uid, displayName: user.displayName);
     });
