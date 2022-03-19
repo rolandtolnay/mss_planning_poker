@@ -26,7 +26,12 @@ abstract class RoomRepository {
 
   Stream<RoomEntity?> onRoomUpdated({required String id});
 
-  Future<RoomEntity?> findRoomForUserId(String id);
+  Future<RoomEntity?> findRoomForUserId(String userId);
+
+  Future<DomainError?> leaveRoomWithId(
+    String roomId, {
+    required String participantId,
+  });
 }
 
 @Collection<RoomModel>('rooms')
@@ -61,13 +66,13 @@ class FirRoomRepository implements RoomRepository {
     try {
       _validateDisplayName(participant);
 
-      final docs = (await _ref.whereName(isEqualTo: roomName).get()).docs;
-      if (docs.isEmpty) {
+      final snapshot = await _ref.whereName(isEqualTo: roomName).get();
+      if (snapshot.docs.isEmpty) {
         return Left(DomainError.noData('No room found.'));
       }
-      assert(docs.length == 1);
+      assert(snapshot.docs.length == 1);
 
-      final room = docs.first.data.entity;
+      final room = snapshot.docs.first.data.entity;
       room.participants.add(RoomParticipantEntity.fromUser(participant));
       await _ref.doc(room.id).set(RoomModel.fromEntity(room));
       return Right(room);
@@ -89,9 +94,37 @@ class FirRoomRepository implements RoomRepository {
 
   @override
   Future<RoomEntity?> findRoomForUserId(String id) async {
-    final docs =
-        (await _ref.whereParticipantIds(arrayContainsAny: [id]).get()).docs;
-    if (docs.isEmpty) return null;
-    return docs.first.data.entity;
+    try {
+      final snapshot =
+          await _ref.whereParticipantIds(arrayContainsAny: [id]).get();
+      if (snapshot.docs.isEmpty) return null;
+      return snapshot.docs.first.data.entity;
+    } catch (e, st) {
+      dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
+      return null;
+    }
+  }
+
+  @override
+  Future<DomainError?> leaveRoomWithId(
+    String roomId, {
+    required String participantId,
+  }) async {
+    try {
+      final roomSnapshot = await _ref.doc(roomId).get();
+      if (!roomSnapshot.exists) return null;
+      final model = roomSnapshot.data!;
+      model.participants.removeWhere((e) => e.id == participantId);
+      model.participantIds.remove(participantId);
+      if (model.participants.isEmpty) {
+        await _ref.doc(roomId).delete();
+      } else {
+        await _ref.doc(roomId).set(model);
+      }
+      return null;
+    } catch (e, st) {
+      dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
+      return DomainError.unexpected('$e');
+    }
   }
 }

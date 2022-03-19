@@ -17,7 +17,9 @@ class RoomParticipantsList extends StatelessWidget {
       stream: _roomRepository.onRoomUpdated(id: roomId),
       builder: (context, snapshot) {
         if (snapshot.hasError) return Center(child: Text('Error occured'));
-        if (!snapshot.hasData) return CircularProgressIndicator();
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
 
         final room = snapshot.data!;
         return ListView.builder(

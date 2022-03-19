@@ -20,11 +20,6 @@ class _HomePageState extends State<HomePage> {
   final _roomRepository = getIt<RoomRepository>();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FutureBuilder<RoomEntity?>(
       future: _roomRepository.findRoomForUserId(widget.userId),
@@ -41,19 +36,28 @@ class _HomePageState extends State<HomePage> {
               barrierDismissible: false,
               builder: (_) => RoomSelectorDialog(),
             );
+            // TODO: Make this stateless after Riverpod
             setState(() {});
           });
+          return Scaffold(body: Container());
         }
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(room?.name ?? 'mssPlanningPoker'),
+            title: Text(room.name),
+            leading: IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: () => _onLeaveRoomPressed(room.id),
+            ),
           ),
-          body: room != null
-              ? RoomParticipantsList(roomId: room.id)
-              : Container(),
+          body: RoomParticipantsList(roomId: room.id),
         );
       },
     );
+  }
+
+  Future<void> _onLeaveRoomPressed(String roomId) async {
+    await _roomRepository.leaveRoomWithId(roomId, participantId: widget.userId);
+    setState(() {});
   }
 }
