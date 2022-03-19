@@ -11,9 +11,11 @@ class RoomModel {
   final String name;
   final DateTime lastUpdated;
 
+  final bool showingValues;
   final List<RoomParticipantModel> participants;
 
-  RoomModel(this.id, this.name, this.lastUpdated, this.participants);
+  RoomModel(this.id, this.name, this.lastUpdated, this.showingValues,
+      this.participants);
 
   factory RoomModel.fromJson(Map<String, dynamic> json) =>
       _$RoomModelFromJson(json);
@@ -24,6 +26,7 @@ class RoomModel {
         entity.id,
         entity.name,
         DateTime.now(),
+        entity.showingValues,
         entity.participants.map(RoomParticipantModel.fromEntity).toList(),
       );
 

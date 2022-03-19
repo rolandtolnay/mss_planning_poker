@@ -9,13 +9,11 @@ class RoomParticipantModel {
   final String displayName;
 
   final String? selectedValue;
-  final bool showingValue;
 
   RoomParticipantModel(
     this.id,
     this.displayName,
     this.selectedValue,
-    this.showingValue,
   );
 
   factory RoomParticipantModel.fromJson(Map<String, dynamic> json) =>
@@ -28,13 +26,11 @@ class RoomParticipantModel {
         entity.id,
         entity.displayName,
         entity.selectedValue,
-        entity.showingValue,
       );
 
   RoomParticipantEntity get entity => RoomParticipantEntity(
         id: id,
         displayName: displayName,
         selectedValue: selectedValue,
-        showingValue: showingValue,
       );
 }

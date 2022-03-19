@@ -5,13 +5,11 @@ class RoomParticipantEntity {
   final String displayName;
 
   final String? selectedValue;
-  final bool showingValue;
 
   RoomParticipantEntity({
     required this.id,
     required this.displayName,
     required this.selectedValue,
-    required this.showingValue,
   });
 
   factory RoomParticipantEntity.fromUser(UserEntity user) {
@@ -20,7 +18,6 @@ class RoomParticipantEntity {
       id: user.id,
       displayName: user.displayName!,
       selectedValue: null,
-      showingValue: false,
     );
   }
 }
