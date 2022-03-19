@@ -20,9 +20,11 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
   final _authRepository = getIt<AuthRepository>();
 
   late final TextEditingController _nameController;
+  late final TextEditingController _roomController;
 
   bool _loading = false;
-  String? _errorText;
+  String? _nameErrorText;
+  String? _roomErrorText;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
 
     final user = _authRepository.currentUser;
     _nameController = TextEditingController(text: user?.displayName);
+    _roomController = TextEditingController();
   }
 
   @override
@@ -38,7 +41,7 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
       controller: _nameController,
       decoration: InputDecoration(
         hintText: 'Display name',
-        errorText: _errorText,
+        errorText: _nameErrorText,
       ),
       onChanged: (_) => setState(() {}),
     );
@@ -48,8 +51,9 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
       onPressed: _onCreateRoomTapped,
     );
     final joinRoomButton = RectangularButton(
-      title: 'Join existing room',
-      enabled: _nameController.text.length >= 3,
+      title: 'Join existing',
+      enabled:
+          _nameController.text.length >= 3 && _roomController.text.length == 4,
       onPressed: _onJoinRoomTapped,
     );
 
@@ -78,9 +82,28 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 120,
+                          child: TextField(
+                            controller: _roomController,
+                            decoration: InputDecoration(
+                              hintText: 'Room number',
+                              errorText: _roomErrorText,
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        joinRoomButton,
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    const Text('or'),
+                    const SizedBox(height: 8.0),
                     newRoomButton,
-                    const SizedBox(height: 16.0),
-                    joinRoomButton,
                   ],
                 ),
               ),
@@ -93,18 +116,19 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
   }
 
   void _onCreateRoomTapped() async {
-    final name = _nameController.text;
     setState(() {
       _loading = true;
     });
+    final name = _nameController.text;
     await _authRepository.updateDisplayName(name);
+
     final result = await _roomRepository.createRoom(
       admin: _authRepository.currentUser!,
     );
     if (result.isLeft) {
       setState(() {
         _loading = false;
-        _errorText = result.left.errorMessage;
+        _nameErrorText = result.left.errorMessage;
       });
     } else {
       Navigator.of(context).pop(result.right);
@@ -112,8 +136,23 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
   }
 
   void _onJoinRoomTapped() async {
+    setState(() {
+      _loading = true;
+    });
     final name = _nameController.text;
     await _authRepository.updateDisplayName(name);
-    // TODO: Implement join room
+
+    final result = await _roomRepository.joinRoom(
+      roomName: _roomController.text,
+      participant: _authRepository.currentUser!,
+    );
+    if (result.isLeft) {
+      setState(() {
+        _loading = false;
+        _roomErrorText = result.left.errorMessage;
+      });
+    } else {
+      Navigator.of(context).pop(result.right);
+    }
   }
 }

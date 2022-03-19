@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'build_context_ext_screen_size.dart';
+import '../extensions/build_context_ext_screen_size.dart';
 
 class MaxWidthContainer extends StatelessWidget {
   const MaxWidthContainer({

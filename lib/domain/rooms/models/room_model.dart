@@ -26,4 +26,10 @@ class RoomModel {
         DateTime.now(),
         entity.participants.map(RoomParticipantModel.fromEntity).toList(),
       );
+
+  RoomEntity get entity => RoomEntity(
+        id: id,
+        name: name,
+        participants: participants.map((e) => e.entity).toList(),
+      );
 }

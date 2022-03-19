@@ -30,4 +30,11 @@ class RoomParticipantModel {
         entity.selectedValue,
         entity.showingValue,
       );
+
+  RoomParticipantEntity get entity => RoomParticipantEntity(
+        id: id,
+        displayName: displayName,
+        selectedValue: selectedValue,
+        showingValue: showingValue,
+      );
 }
