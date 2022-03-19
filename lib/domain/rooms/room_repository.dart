@@ -23,6 +23,10 @@ abstract class RoomRepository {
     required String roomName,
     required UserEntity participant,
   });
+
+  Stream<RoomEntity?> onRoomUpdated({required String id});
+
+  Future<RoomEntity?> findRoomForUserId(String id);
 }
 
 @Collection<RoomModel>('rooms')
@@ -77,5 +81,17 @@ class FirRoomRepository implements RoomRepository {
     if (user.displayName == null) {
       throw Exception('Display name cannot be empty.');
     }
+  }
+
+  @override
+  Stream<RoomEntity?> onRoomUpdated({required String id}) =>
+      _ref.doc(id).snapshots().map((e) => e.data?.entity);
+
+  @override
+  Future<RoomEntity?> findRoomForUserId(String id) async {
+    final docs =
+        (await _ref.whereParticipantIds(arrayContainsAny: [id]).get()).docs;
+    if (docs.isEmpty) return null;
+    return docs.first.data.entity;
   }
 }

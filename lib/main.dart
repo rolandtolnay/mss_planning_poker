@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
 import 'injectable/injectable.dart';
-import 'presentation/home_page.dart';
+import 'presentation/root.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,11 +22,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(),
+      title: 'mss Planning Poker',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const RootPage(),
     );
   }
 }

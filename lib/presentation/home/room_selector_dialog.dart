@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../domain/auth/auth_repository.dart';
-import '../domain/rooms/room_repository.dart';
-import '../injectable/injectable.dart';
-import 'common/loadable_widget.dart';
-import 'common/max_width_container.dart';
-import 'common/rectangular_button.dart';
-import 'extensions/build_context_ext_screen_size.dart';
+import '../../domain/auth/auth_repository.dart';
+import '../../domain/rooms/room_repository.dart';
+import '../../injectable/injectable.dart';
+import '../common/loadable_widget.dart';
+import '../common/max_width_container.dart';
+import '../common/rectangular_button.dart';
+import '../extensions/build_context_ext_screen_size.dart';
 
 class RoomSelectorDialog extends StatefulWidget {
   const RoomSelectorDialog({Key? key}) : super(key: key);
