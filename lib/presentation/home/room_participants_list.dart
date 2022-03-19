@@ -13,6 +13,9 @@ class RoomParticipantsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return StreamBuilder<RoomEntity?>(
       stream: _roomRepository.onRoomUpdated(id: roomId),
       builder: (context, snapshot) {
@@ -23,10 +26,17 @@ class RoomParticipantsList extends StatelessWidget {
 
         final room = snapshot.data!;
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           itemCount: room.participants.length,
           itemBuilder: (_, index) {
             final user = room.participants[index];
-            return ListTile(title: Text(user.displayName));
+            return ListTile(
+              title: Text(user.displayName),
+              trailing: Text(
+                user.selectedValue ?? '-',
+                style: textTheme.headline6,
+              ),
+            );
           },
         );
       },

@@ -33,4 +33,7 @@ class RoomParticipantModel {
         displayName: displayName,
         selectedValue: selectedValue,
       );
+
+  RoomParticipantModel copyWith({String? selectedValue}) =>
+      RoomParticipantModel(id, displayName, selectedValue);
 }

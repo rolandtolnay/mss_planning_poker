@@ -32,6 +32,12 @@ abstract class RoomRepository {
     String roomId, {
     required String participantId,
   });
+
+  Future<DomainError?> setValue(
+    String? value, {
+    required String roomId,
+    required String participantId,
+  });
 }
 
 @Collection<RoomModel>('rooms')
@@ -121,6 +127,28 @@ class FirRoomRepository implements RoomRepository {
       } else {
         await _ref.doc(roomId).set(model);
       }
+      return null;
+    } catch (e, st) {
+      dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
+      return DomainError.unexpected('$e');
+    }
+  }
+
+  @override
+  Future<DomainError?> setValue(
+    String? value, {
+    required String roomId,
+    required String participantId,
+  }) async {
+    try {
+      final roomSnapshot = await _ref.doc(roomId).get();
+      if (!roomSnapshot.exists) return DomainError.noData('No room found');
+      final model = roomSnapshot.data!;
+      final participant =
+          model.participants.firstWhere((e) => e.id == participantId);
+      model.participants.remove(participant);
+      model.participants.add(participant.copyWith(selectedValue: value));
+      await _ref.doc(roomId).set(model);
       return null;
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);

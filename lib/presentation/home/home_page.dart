@@ -7,6 +7,8 @@ import '../common/loading_scaffold.dart';
 import 'room_participants_list.dart';
 import 'room_selector_dialog.dart';
 
+const List<String> _cards = ['?', '1', '2', '3', '5', '8', '13'];
+
 class HomePage extends StatefulWidget {
   final String userId;
 
@@ -50,7 +52,31 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => _onLeaveRoomPressed(room.id),
             ),
           ),
-          body: RoomParticipantsList(roomId: room.id),
+          body: Column(
+            children: [
+              Expanded(child: RoomParticipantsList(roomId: room.id)),
+              SizedBox(
+                height: 100,
+                child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _cards
+                          .map(
+                            (e) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: PokerCardWidget(
+                                value: e,
+                                roomId: room.id,
+                                userId: widget.userId,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    )),
+              )
+            ],
+          ),
         );
       },
     );
@@ -59,5 +85,50 @@ class _HomePageState extends State<HomePage> {
   Future<void> _onLeaveRoomPressed(String roomId) async {
     await _roomRepository.leaveRoomWithId(roomId, participantId: widget.userId);
     setState(() {});
+  }
+}
+
+class PokerCardWidget extends StatelessWidget {
+  final String value;
+  final String roomId;
+  final String userId;
+
+  final _roomRepository = getIt<RoomRepository>();
+
+  PokerCardWidget({
+    required this.value,
+    required this.roomId,
+    required this.userId,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    return SizedBox(
+      height: 80,
+      width: 56,
+      child: TextButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith(
+            (_) => colorScheme.secondary,
+          ),
+        ),
+        child: Text(
+          value,
+          style: textTheme.subtitle1?.copyWith(color: colorScheme.onSecondary),
+        ),
+        onPressed: () {
+          _roomRepository.setValue(
+            value,
+            roomId: roomId,
+            participantId: userId,
+          );
+        },
+      ),
+    );
   }
 }
