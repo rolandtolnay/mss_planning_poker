@@ -11,7 +11,7 @@ abstract class AuthRepository {
   Future<void> updateDisplayName(String name);
 }
 
-@Injectable(as: AuthRepository)
+@LazySingleton(as: AuthRepository)
 class FirAuthRepository implements AuthRepository {
   final _auth = FirebaseAuth.instance;
 

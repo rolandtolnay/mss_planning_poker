@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mss_planning_poker/domain/auth/user_entity.dart';
+import 'package:mss_planning_poker/domain/rooms/room_repository.dart';
 
 import '../domain/auth/auth_repository.dart';
 import '../injectable/injectable.dart';
@@ -39,11 +40,21 @@ class _HomePageState extends State<HomePage> {
             final user = snapshot.data!;
             return Column(
               children: [
+                const Spacer(),
                 Text('User id: ${user.id}'),
+                const SizedBox(height: 16),
                 if (user.displayName == null)
                   Text('User has no name.')
                 else
                   Text('User display name: ${user.displayName}.'),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () async {
+                    await getIt<RoomRepository>().createRoom(admin: user);
+                  },
+                  child: Text('Create room'),
+                ),
+                const Spacer(),
               ],
             );
           },

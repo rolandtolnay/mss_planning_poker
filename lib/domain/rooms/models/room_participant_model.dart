@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
 
 part 'room_participant_model.g.dart';
 
@@ -21,4 +22,12 @@ class RoomParticipantModel {
       _$RoomParticipantModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$RoomParticipantModelToJson(this);
+
+  factory RoomParticipantModel.fromEntity(RoomParticipantEntity entity) =>
+      RoomParticipantModel(
+        entity.id,
+        entity.displayName,
+        entity.selectedValue,
+        entity.showingValue,
+      );
 }
