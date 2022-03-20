@@ -1,13 +1,14 @@
 import 'package:mss_planning_poker/domain/auth/user_entity.dart';
+import 'package:equatable/equatable.dart';
 
-class RoomParticipantEntity {
-  final String id;
+class RoomParticipantEntity extends Equatable {
+  final String userId;
   final String displayName;
 
   final String? selectedValue;
 
-  RoomParticipantEntity({
-    required this.id,
+  const RoomParticipantEntity({
+    required this.userId,
     required this.displayName,
     required this.selectedValue,
   });
@@ -15,9 +16,12 @@ class RoomParticipantEntity {
   factory RoomParticipantEntity.fromUser(UserEntity user) {
     assert(user.displayName != null);
     return RoomParticipantEntity(
-      id: user.id,
+      userId: user.id,
       displayName: user.displayName!,
       selectedValue: null,
     );
   }
+
+  @override
+  List<Object?> get props => [userId];
 }

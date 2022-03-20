@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:either_dart/either.dart';
 import 'package:injectable/injectable.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../auth/user_entity.dart';
 import '../domain_error.dart';
@@ -41,7 +42,11 @@ abstract class RoomRepository {
 }
 
 @Collection<RoomModel>('rooms')
-final _ref = RoomModelCollectionReference();
+@Collection<RoomParticipantModel>('rooms/*/participants')
+final _roomsRef = RoomModelCollectionReference();
+
+RoomParticipantModelCollectionReference _participantsRef(String roomId) =>
+    _roomsRef.doc(roomId).participants;
 
 @LazySingleton(as: RoomRepository)
 class FirRoomRepository implements RoomRepository {
@@ -51,12 +56,13 @@ class FirRoomRepository implements RoomRepository {
     try {
       _validateDisplayName(admin);
 
-      final doc = _ref.doc();
-      final room = RoomEntity(
-        id: doc.id,
-        participants: [RoomParticipantEntity.fromUser(admin)],
-      );
+      final doc = _roomsRef.doc();
+      final pcp = RoomParticipantEntity.fromUser(admin);
+      final room = RoomEntity(id: doc.id, participants: {pcp});
       await doc.set(RoomModel.fromEntity(room));
+      _participantsRef(doc.id).doc(admin.id).set(
+            RoomParticipantModel.fromEntity(pcp),
+          );
       return Right(room);
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
@@ -72,15 +78,23 @@ class FirRoomRepository implements RoomRepository {
     try {
       _validateDisplayName(participant);
 
-      final snapshot = await _ref.whereName(isEqualTo: roomName).get();
-      if (snapshot.docs.isEmpty) {
+      final roomSnap = await _roomsRef.whereName(isEqualTo: roomName).get();
+      if (roomSnap.docs.isEmpty) {
         return Left(DomainError.noData('No room found.'));
       }
-      assert(snapshot.docs.length == 1);
+      assert(roomSnap.docs.length == 1);
+      final roomDoc = roomSnap.docs.first;
 
-      final room = snapshot.docs.first.data.entity;
-      room.participants.add(RoomParticipantEntity.fromUser(participant));
-      await _ref.doc(room.id).set(RoomModel.fromEntity(room));
+      final pcpsSnap = await _participantsRef(roomDoc.id).get();
+      final pcps = pcpsSnap.docs.map((e) => e.data);
+      final pcpModel = participant.toRoomParticipantModel();
+      await _participantsRef(roomDoc.id).doc(participant.id).set(pcpModel);
+
+      final room = roomDoc.data.entity(
+        participants: pcps.followedBy([pcpModel]),
+      );
+      await roomDoc.reference.update(participantIds: room.participantIds);
+
       return Right(room);
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
@@ -88,23 +102,29 @@ class FirRoomRepository implements RoomRepository {
     }
   }
 
-  void _validateDisplayName(UserEntity user) {
-    if (user.displayName == null) {
-      throw Exception('Display name cannot be empty.');
-    }
-  }
-
   @override
   Stream<RoomEntity?> onRoomUpdated({required String id}) =>
-      _ref.doc(id).snapshots().map((e) => e.data?.entity);
+      _roomsRef.doc(id).snapshots().combineLatest(
+        _participantsRef(id).snapshots(),
+        (roomSnap, RoomParticipantModelQuerySnapshot pcpsSnap) {
+          if (roomSnap.data == null) return null;
+          final pcps = pcpsSnap.docs.map((e) => e.data);
+          return roomSnap.data!.entity(participants: pcps);
+        },
+      );
 
   @override
   Future<RoomEntity?> findRoomForUserId(String id) async {
     try {
-      final snapshot =
-          await _ref.whereParticipantIds(arrayContainsAny: [id]).get();
-      if (snapshot.docs.isEmpty) return null;
-      return snapshot.docs.first.data.entity;
+      final roomSnap =
+          await _roomsRef.whereParticipantIds(arrayContainsAny: [id]).get();
+      if (roomSnap.docs.isEmpty) return null;
+      assert(roomSnap.docs.length == 1);
+      final roomDoc = roomSnap.docs.first;
+
+      final pcpsSnap = await _participantsRef(roomDoc.id).get();
+      final pcps = pcpsSnap.docs.map((e) => e.data);
+      return roomDoc.data.entity(participants: pcps);
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
       return null;
@@ -117,15 +137,20 @@ class FirRoomRepository implements RoomRepository {
     required String participantId,
   }) async {
     try {
-      final roomSnapshot = await _ref.doc(roomId).get();
-      if (!roomSnapshot.exists) return null;
-      final model = roomSnapshot.data!;
-      model.participants.removeWhere((e) => e.id == participantId);
-      model.participantIds.remove(participantId);
-      if (model.participants.isEmpty) {
-        await _ref.doc(roomId).delete();
+      final roomSnap = await _roomsRef.doc(roomId).get();
+      if (roomSnap.data == null) return DomainError.noData('No room found.');
+
+      final pcpSnap = await _participantsRef(roomId).doc(participantId).get();
+      if (!pcpSnap.exists) return null;
+
+      await pcpSnap.reference.delete();
+      final pcpIds = roomSnap.data!.participantIds;
+      pcpIds.remove(participantId);
+
+      if (pcpIds.isEmpty) {
+        await roomSnap.reference.delete();
       } else {
-        await _ref.doc(roomId).set(model);
+        await roomSnap.reference.update(participantIds: pcpIds);
       }
       return null;
     } catch (e, st) {
@@ -141,18 +166,32 @@ class FirRoomRepository implements RoomRepository {
     required String participantId,
   }) async {
     try {
-      final roomSnapshot = await _ref.doc(roomId).get();
-      if (!roomSnapshot.exists) return DomainError.noData('No room found');
-      final model = roomSnapshot.data!;
-      final participant =
-          model.participants.firstWhere((e) => e.id == participantId);
-      model.participants.remove(participant);
-      model.participants.add(participant.copyWith(selectedValue: value));
-      await _ref.doc(roomId).set(model);
+      final roomSnap = await _roomsRef.doc(roomId).get();
+      if (roomSnap.data == null) return DomainError.noData('No room found');
+
+      final pcpSnap = await _participantsRef(roomId).doc(participantId).get();
+      if (pcpSnap.data == null) return DomainError.noData('No user found');
+      await pcpSnap.reference.update(selectedValue: value);
+
       return null;
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
       return DomainError.unexpected('$e');
     }
   }
+
+  void _validateDisplayName(UserEntity user) {
+    if (user.displayName == null) {
+      throw Exception('Display name cannot be empty.');
+    }
+  }
+}
+
+extension on UserEntity {
+  RoomParticipantModel toRoomParticipantModel() =>
+      RoomParticipantModel.fromEntity(RoomParticipantEntity.fromUser(this));
+}
+
+extension on RoomEntity {
+  List<String> get participantIds => participants.map((e) => e.userId).toList();
 }

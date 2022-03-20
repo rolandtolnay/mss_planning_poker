@@ -5,13 +5,13 @@ part 'room_participant_model.g.dart';
 
 @JsonSerializable()
 class RoomParticipantModel {
-  final String id;
+  final String userId;
   final String displayName;
 
   final String? selectedValue;
 
   RoomParticipantModel(
-    this.id,
+    this.userId,
     this.displayName,
     this.selectedValue,
   );
@@ -23,17 +23,22 @@ class RoomParticipantModel {
 
   factory RoomParticipantModel.fromEntity(RoomParticipantEntity entity) =>
       RoomParticipantModel(
-        entity.id,
+        entity.userId,
         entity.displayName,
         entity.selectedValue,
       );
 
   RoomParticipantEntity get entity => RoomParticipantEntity(
-        id: id,
+        userId: userId,
         displayName: displayName,
         selectedValue: selectedValue,
       );
 
   RoomParticipantModel copyWith({String? selectedValue}) =>
-      RoomParticipantModel(id, displayName, selectedValue);
+      RoomParticipantModel(userId, displayName, selectedValue);
+}
+
+extension RoomParticipantEntityParsing on List<RoomParticipantEntity> {
+  List<RoomParticipantModel> toModelList() =>
+      map(RoomParticipantModel.fromEntity).toList();
 }

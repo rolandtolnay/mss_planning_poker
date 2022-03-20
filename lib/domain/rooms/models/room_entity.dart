@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
@@ -7,14 +8,15 @@ class RoomEntity {
   final String name;
   final bool showingValues;
 
-  final List<RoomParticipantEntity> participants;
+  final UnmodifiableListView<RoomParticipantEntity> participants;
 
   RoomEntity({
     required this.id,
-    required this.participants,
+    Set<RoomParticipantEntity> participants = const {},
     this.showingValues = false,
     String? name,
-  }) : name = name ?? _makeName();
+  })  : name = name ?? _makeName(),
+        participants = UnmodifiableListView(participants);
 
   static String _makeName() {
     final random = Random();
