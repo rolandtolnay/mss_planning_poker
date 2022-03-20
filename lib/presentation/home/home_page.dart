@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
+import '../../domain/rooms/participant_repository.dart';
 import '../../domain/rooms/room_repository.dart';
 import '../../injectable/injectable.dart';
 import '../common/loading_scaffold.dart';
@@ -20,6 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _roomRepository = getIt<RoomRepository>();
+  final _pcpRepository = getIt<ParticipantRepository>();
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +86,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _onLeaveRoomPressed(String roomId) async {
-    await _roomRepository.leaveRoomWithId(roomId, participantId: widget.userId);
+    await _pcpRepository.leaveRoomWithId(roomId, participantId: widget.userId);
     setState(() {});
   }
 }
@@ -93,7 +96,7 @@ class PokerCardWidget extends StatelessWidget {
   final String roomId;
   final String userId;
 
-  final _roomRepository = getIt<RoomRepository>();
+  final _pcpRepository = getIt<ParticipantRepository>();
 
   PokerCardWidget({
     required this.value,
@@ -111,24 +114,35 @@ class PokerCardWidget extends StatelessWidget {
     return SizedBox(
       height: 80,
       width: 56,
-      child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith(
-            (_) => colorScheme.secondary,
-          ),
-        ),
-        child: Text(
-          value,
-          style: textTheme.subtitle1?.copyWith(color: colorScheme.onSecondary),
-        ),
-        onPressed: () {
-          _roomRepository.setValue(
-            value,
-            roomId: roomId,
-            participantId: userId,
-          );
-        },
-      ),
+      child: StreamBuilder<RoomParticipantEntity?>(
+          stream: _pcpRepository.onParticipantChanged(userId, roomId: roomId),
+          builder: (context, snapshot) {
+            var backgroundColor = colorScheme.secondary;
+            if (snapshot.data != null &&
+                snapshot.data!.selectedValue == value) {
+              backgroundColor = colorScheme.error;
+            }
+
+            return TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith(
+                  (_) => backgroundColor,
+                ),
+              ),
+              child: Text(
+                value,
+                style: textTheme.subtitle1
+                    ?.copyWith(color: colorScheme.onSecondary),
+              ),
+              onPressed: () {
+                _pcpRepository.setValue(
+                  value,
+                  roomId: roomId,
+                  participantId: userId,
+                );
+              },
+            );
+          }),
     );
   }
 }

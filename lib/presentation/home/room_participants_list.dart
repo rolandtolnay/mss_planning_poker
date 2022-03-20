@@ -30,10 +30,13 @@ class RoomParticipantsList extends StatelessWidget {
           itemCount: room.participants.length,
           itemBuilder: (_, index) {
             final user = room.participants[index];
+
+            final valueText =
+                room.showingValues ? user.selectedValue ?? '-' : 'hidden';
             return ListTile(
               title: Text(user.displayName),
               trailing: Text(
-                user.selectedValue ?? '-',
+                valueText,
                 style: textTheme.headline6,
               ),
             );
