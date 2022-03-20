@@ -4,6 +4,7 @@ import 'package:either_dart/either.dart';
 import 'package:injectable/injectable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../injectable/injectable.dart';
 import '../auth/user_entity.dart';
 import '../domain_error.dart';
 import '../fir_collection_reference.dart';
@@ -11,6 +12,8 @@ import 'models/room_entity.dart';
 import 'models/room_model.dart';
 import 'models/room_participant_entity.dart';
 import 'models/room_participant_model.dart';
+
+final roomRepository = getIt<RoomRepository>();
 
 abstract class RoomRepository {
   Future<Either<DomainError, RoomEntity>> createRoom({

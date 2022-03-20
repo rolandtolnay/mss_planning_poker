@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/auth/auth_repository.dart';
 import '../../domain/rooms/room_repository.dart';
-import '../../injectable/injectable.dart';
 import '../common/loadable_widget.dart';
 import '../common/max_width_container.dart';
 import '../common/rectangular_button.dart';
@@ -16,9 +15,6 @@ class RoomSelectorDialog extends StatefulWidget {
 }
 
 class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
-  final _roomRepository = getIt<RoomRepository>();
-  final _authRepository = getIt<AuthRepository>();
-
   late final TextEditingController _nameController;
   late final TextEditingController _roomController;
 
@@ -30,7 +26,7 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
   void initState() {
     super.initState();
 
-    final user = _authRepository.currentUser;
+    final user = authRepository.currentUser;
     _nameController = TextEditingController(text: user?.displayName);
     _roomController = TextEditingController();
   }
@@ -120,10 +116,10 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
       _loading = true;
     });
     final name = _nameController.text;
-    await _authRepository.updateDisplayName(name);
+    await authRepository.updateDisplayName(name);
 
-    final result = await _roomRepository.createRoom(
-      admin: _authRepository.currentUser!,
+    final result = await roomRepository.createRoom(
+      admin: authRepository.currentUser!,
     );
     if (result.isLeft) {
       setState(() {
@@ -140,11 +136,11 @@ class _RoomSelectorDialogState extends State<RoomSelectorDialog> {
       _loading = true;
     });
     final name = _nameController.text;
-    await _authRepository.updateDisplayName(name);
+    await authRepository.updateDisplayName(name);
 
-    final result = await _roomRepository.joinRoom(
+    final result = await roomRepository.joinRoom(
       roomName: _roomController.text,
-      participant: _authRepository.currentUser!,
+      participant: authRepository.currentUser!,
     );
     if (result.isLeft) {
       setState(() {

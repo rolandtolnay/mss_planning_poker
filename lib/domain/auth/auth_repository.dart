@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../injectable/injectable.dart';
 import 'user_entity.dart';
+
+final authRepository = getIt<AuthRepository>();
 
 abstract class AuthRepository {
   UserEntity? get currentUser;

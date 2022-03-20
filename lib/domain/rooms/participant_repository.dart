@@ -1,10 +1,13 @@
 import 'dart:developer' as dev;
 
 import 'package:injectable/injectable.dart';
-import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
 
+import '../../injectable/injectable.dart';
 import '../domain_error.dart';
 import '../fir_collection_reference.dart';
+import 'models/room_participant_entity.dart';
+
+final pcpRepository = getIt<ParticipantRepository>();
 
 abstract class ParticipantRepository {
   Stream<RoomParticipantEntity?> onParticipantChanged(

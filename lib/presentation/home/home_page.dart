@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
+import '../../domain/rooms/models/room_participant_entity.dart';
 import '../../domain/rooms/participant_repository.dart';
 import '../../domain/rooms/room_repository.dart';
-import '../../injectable/injectable.dart';
 import '../common/loading_scaffold.dart';
 import 'room_participants_list.dart';
 import 'room_selector_dialog.dart';
@@ -21,13 +20,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _roomRepository = getIt<RoomRepository>();
-  final _pcpRepository = getIt<ParticipantRepository>();
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<RoomEntity?>(
-      future: _roomRepository.findRoomForUserId(widget.userId),
+      future: roomRepository.findRoomForUserId(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return LoadingScaffold();
@@ -86,7 +82,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _onLeaveRoomPressed(String roomId) async {
-    await _pcpRepository.leaveRoomWithId(roomId, participantId: widget.userId);
+    await pcpRepository.leaveRoomWithId(roomId, participantId: widget.userId);
     setState(() {});
   }
 }
@@ -96,9 +92,7 @@ class PokerCardWidget extends StatelessWidget {
   final String roomId;
   final String userId;
 
-  final _pcpRepository = getIt<ParticipantRepository>();
-
-  PokerCardWidget({
+  const PokerCardWidget({
     required this.value,
     required this.roomId,
     required this.userId,
@@ -115,34 +109,34 @@ class PokerCardWidget extends StatelessWidget {
       height: 80,
       width: 56,
       child: StreamBuilder<RoomParticipantEntity?>(
-          stream: _pcpRepository.onParticipantChanged(userId, roomId: roomId),
-          builder: (context, snapshot) {
-            var backgroundColor = colorScheme.secondary;
-            if (snapshot.data != null &&
-                snapshot.data!.selectedValue == value) {
-              backgroundColor = colorScheme.error;
-            }
+        stream: pcpRepository.onParticipantChanged(userId, roomId: roomId),
+        builder: (context, snapshot) {
+          var backgroundColor = colorScheme.secondary;
+          if (snapshot.data != null && snapshot.data!.selectedValue == value) {
+            backgroundColor = colorScheme.error;
+          }
 
-            return TextButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith(
-                  (_) => backgroundColor,
-                ),
+          return TextButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith(
+                (_) => backgroundColor,
               ),
-              child: Text(
+            ),
+            child: Text(
+              value,
+              style:
+                  textTheme.subtitle1?.copyWith(color: colorScheme.onSecondary),
+            ),
+            onPressed: () {
+              pcpRepository.setValue(
                 value,
-                style: textTheme.subtitle1
-                    ?.copyWith(color: colorScheme.onSecondary),
-              ),
-              onPressed: () {
-                _pcpRepository.setValue(
-                  value,
-                  roomId: roomId,
-                  participantId: userId,
-                );
-              },
-            );
-          }),
+                roomId: roomId,
+                participantId: userId,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
