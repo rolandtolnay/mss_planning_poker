@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'injectable/injectable.dart';
-import 'presentation/root.dart';
+import 'presentation/auth/auth_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'mss Planning Poker',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const RootPage(),
+      home: const AuthWidget(),
     );
   }
 }

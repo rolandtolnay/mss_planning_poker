@@ -25,5 +25,6 @@ linter:
 analyzer:
   errors:
     prefer_const_constructors: ignore
+    unnecessary_lambdas: ignore
   exclude:
     - "lib/**.g.dart"

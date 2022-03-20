@@ -4,7 +4,6 @@ import 'package:either_dart/either.dart';
 import 'package:injectable/injectable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../injectable/injectable.dart';
 import '../auth/user_entity.dart';
 import '../domain_error.dart';
 import '../fir_collection_reference.dart';
@@ -13,21 +12,19 @@ import 'models/room_model.dart';
 import 'models/room_participant_entity.dart';
 import 'models/room_participant_model.dart';
 
-final roomRepository = getIt<RoomRepository>();
-
 abstract class RoomRepository {
   Future<Either<DomainError, RoomEntity>> createRoom({
     required UserEntity admin,
   });
 
-  Future<Either<DomainError, RoomEntity>> joinRoom({
-    required String roomName,
+  Future<Either<DomainError, RoomEntity>> joinRoomNamed(
+    String roomName, {
     required UserEntity participant,
   });
 
   Stream<RoomEntity?> onRoomUpdated({required String id});
 
-  Future<RoomEntity?> findRoomForUserId(String userId);
+  Future<Either<DomainError, RoomEntity?>> findRoomForUserId(String userId);
 }
 
 @LazySingleton(as: RoomRepository)
@@ -57,8 +54,8 @@ class FirRoomRepository implements RoomRepository {
   }
 
   @override
-  Future<Either<DomainError, RoomEntity>> joinRoom({
-    required String roomName,
+  Future<Either<DomainError, RoomEntity>> joinRoomNamed(
+    String roomName, {
     required UserEntity participant,
   }) async {
     try {
@@ -100,20 +97,20 @@ class FirRoomRepository implements RoomRepository {
       );
 
   @override
-  Future<RoomEntity?> findRoomForUserId(String id) async {
+  Future<Either<DomainError, RoomEntity?>> findRoomForUserId(String id) async {
     try {
       final roomSnap =
           await _ref.rooms.whereParticipantIds(arrayContainsAny: [id]).get();
-      if (roomSnap.docs.isEmpty) return null;
+      if (roomSnap.docs.isEmpty) return Right(null);
       assert(roomSnap.docs.length == 1);
       final roomDoc = roomSnap.docs.first;
 
       final pcpsSnap = await _ref.participants(roomDoc.id).get();
       final pcps = pcpsSnap.docs.map((e) => e.data);
-      return roomDoc.data.entity(participants: pcps);
+      return Right(roomDoc.data.entity(participants: pcps));
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
-      return null;
+      return Left(DomainError.unexpected('$e'));
     }
   }
 
