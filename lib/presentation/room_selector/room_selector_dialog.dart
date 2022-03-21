@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
+import '../../injectable/injectable.dart';
 import '../auth/user_state_notifier.dart';
 import '../common/common_dialog.dart';
 import '../common/loadable_widget.dart';
 import '../common/rectangular_button.dart';
-import 'room_selector_provider.dart';
+import 'room_selector_state_notifier.dart';
+
+final roomSelectorProvider =
+    StateNotifierProvider<RoomSelectorStateNotifier, RoomSelectorState>(
+  (ref) => getIt<RoomSelectorStateNotifier>(),
+);
 
 class RoomSelectorDialog extends ConsumerStatefulWidget {
   static Future<RoomEntity?> show(BuildContext context) {
