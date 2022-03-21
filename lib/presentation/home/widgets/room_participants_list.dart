@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/rooms/models/room_entity.dart';
-import '../../domain/rooms/room_repository.dart';
-import '../../injectable/injectable.dart';
+import '../../../domain/rooms/models/room_entity.dart';
+import '../../../domain/rooms/room_repository.dart';
+import '../../../injectable/injectable.dart';
 
 final _roomUpdateNotifier =
     StreamProvider.autoDispose.family<RoomEntity?, String>(

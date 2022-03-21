@@ -17,7 +17,7 @@ class AuthProvider extends StateNotifier<UserEntity?> {
   late final StreamSubscription _listener;
 
   AuthProvider(this._repository) : super(null) {
-    _listener = _repository.onUserChanged.listen((user) {
+    _listener = _repository.onAuthStateChanged.listen((user) {
       state = user;
     });
   }
