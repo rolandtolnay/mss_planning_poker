@@ -17,18 +17,18 @@ class RoomSelectorDialog extends ConsumerStatefulWidget {
     );
   }
 
-  RoomSelectorDialog({Key? key}) : super(key: key);
-
-  final isLoading = StateProvider<bool>((ref) {
-    final state = ref.watch(roomSelectorProvider);
-    final loading = state.whenOrNull(loading: () => true);
-    return loading ?? false;
-  });
+  const RoomSelectorDialog({Key? key}) : super(key: key);
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _RoomSelectorDialogState();
 }
+
+final _isLoading = StateProvider<bool>((ref) {
+  final state = ref.watch(roomSelectorProvider);
+  final loading = state.whenOrNull(loading: () => true);
+  return loading ?? false;
+});
 
 class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   late final TextEditingController _nameController;
@@ -85,7 +85,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
             nameInput,
             const SizedBox(height: 16.0),
             LoadableWidget(
-              loading: ref.watch(widget.isLoading),
+              loading: ref.watch(_isLoading),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -142,7 +142,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
 
   Future<void> _updateDisplayName() async {
     final name = _nameController.text;
-    ref.read(widget.isLoading.notifier).state = true;
+    ref.read(_isLoading.notifier).state = true;
     await ref.read(authProvider.notifier).updateDisplayName(name);
   }
 }
