@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../common/loading_scaffold.dart';
 import '../home/home_page.dart';
-import 'auth_provider.dart';
+import 'user_state_notifier.dart';
 
 class AuthWidget extends ConsumerStatefulWidget {
   const AuthWidget({Key? key}) : super(key: key);
@@ -16,12 +16,12 @@ class _RootPageState extends ConsumerState<AuthWidget> {
   @override
   void initState() {
     super.initState();
-    ref.read(authProvider.notifier).signInAnonymously();
+    ref.read(userProvider.notifier).signInAnonymously();
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider);
+    final user = ref.watch(userProvider);
     if (user == null) return LoadingScaffold();
     return HomePage(userId: user.id);
   }

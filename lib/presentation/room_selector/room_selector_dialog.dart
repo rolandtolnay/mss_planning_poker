@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
-import '../auth/auth_provider.dart';
+import '../auth/user_state_notifier.dart';
 import '../common/common_dialog.dart';
 import '../common/loadable_widget.dart';
 import '../common/rectangular_button.dart';
@@ -38,7 +38,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   void initState() {
     super.initState();
 
-    final displayName = ref.read(authProvider)?.displayName;
+    final displayName = ref.read(userProvider)?.displayName;
     _nameController = TextEditingController(text: displayName);
     _roomController = TextEditingController();
   }
@@ -116,7 +116,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   void _onCreateRoomTapped() async {
     await _updateDisplayName();
 
-    final user = ref.read(authProvider);
+    final user = ref.read(userProvider);
     if (user == null) return;
     await ref.read(roomSelectorProvider.notifier).createRoom(user: user);
 
@@ -130,7 +130,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   void _onJoinRoomTapped() async {
     await _updateDisplayName();
 
-    final user = ref.read(authProvider);
+    final user = ref.read(userProvider);
     if (user == null) return;
     final roomName = _roomController.text;
     final notifier = ref.read(roomSelectorProvider.notifier);
@@ -143,6 +143,6 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   Future<void> _updateDisplayName() async {
     final name = _nameController.text;
     ref.read(_isLoading.notifier).state = true;
-    await ref.read(authProvider.notifier).updateDisplayName(name);
+    await ref.read(userProvider.notifier).updateDisplayName(name);
   }
 }

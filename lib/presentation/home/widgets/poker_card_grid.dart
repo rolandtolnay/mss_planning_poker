@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../domain/rooms/models/poker_card.dart';
 import '../../../injectable/injectable.dart';
-import '../participant_value_notifier.dart';
+import '../selected_card_notifier.dart';
 import 'poker_card_widget.dart';
 
-final _cardProvider = Provider<List<String>>((ref) {
+final _cardProvider = Provider<List<PokerCard>>((ref) {
   return ['?', '1', '2', '3', '5', '8', '13'];
 });
 
-final pcpValueProvider =
-    StateNotifierProvider<ParticipantValueNotifier, String?>(
-  (ref) => getIt<ParticipantValueNotifier>(param1: ref),
+final _selectedCardProvider =
+    StateNotifierProvider<SelectedCardNotifier, PokerCard?>(
+  (ref) => getIt<SelectedCardNotifier>(param1: ref),
 );
 
 class PokerCardGrid extends ConsumerStatefulWidget {
@@ -25,13 +26,13 @@ class _PokerCardGridState extends ConsumerState<PokerCardGrid> {
   @override
   void initState() {
     super.initState();
-    ref.read(pcpValueProvider.notifier).listenOnChanges();
+    ref.read(_selectedCardProvider.notifier).listenOnChanges();
   }
 
   @override
   Widget build(BuildContext context) {
     final cards = ref.watch(_cardProvider);
-    final selectedCard = ref.watch(pcpValueProvider);
+    final selectedCard = ref.watch(_selectedCardProvider);
     return SizedBox(
       height: 100,
       child: SingleChildScrollView(
@@ -44,13 +45,15 @@ class _PokerCardGridState extends ConsumerState<PokerCardGrid> {
     );
   }
 
-  Widget _buildCard(String value, {required bool highlighted}) {
+  Widget _buildCard(PokerCard card, {required bool highlighted}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: PokerCardWidget(
-        value: value,
+        card: card,
         highlighted: highlighted,
-        onTapped: (_) => ref.read(pcpValueProvider.notifier).setValue(value),
+        onTapped: (_) {
+          ref.read(_selectedCardProvider.notifier).selectCard(card);
+        },
       ),
     );
   }

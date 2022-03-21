@@ -41,7 +41,7 @@ class RoomParticipantsList extends ConsumerWidget {
         final user = room.participants[index];
 
         final valueText =
-            room.showingValues ? user.selectedValue ?? '-' : 'hidden';
+            room.showingCards ? user.selectedCard ?? '-' : 'hidden';
         return ListTile(
           title: Text(user.displayName),
           trailing: Text(valueText, style: textTheme.headline6),

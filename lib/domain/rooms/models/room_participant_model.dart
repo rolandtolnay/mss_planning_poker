@@ -8,12 +8,12 @@ class RoomParticipantModel {
   final String userId;
   final String displayName;
 
-  final String? selectedValue;
+  final String? selectedCard;
 
   RoomParticipantModel(
     this.userId,
     this.displayName,
-    this.selectedValue,
+    this.selectedCard,
   );
 
   factory RoomParticipantModel.fromJson(Map<String, dynamic> json) =>
@@ -25,13 +25,13 @@ class RoomParticipantModel {
       RoomParticipantModel(
         entity.userId,
         entity.displayName,
-        entity.selectedValue,
+        entity.selectedCard,
       );
 
   RoomParticipantEntity get entity => RoomParticipantEntity(
         userId: userId,
         displayName: displayName,
-        selectedValue: selectedValue,
+        selectedCard: selectedCard,
       );
 
   RoomParticipantModel copyWith({String? selectedValue}) =>

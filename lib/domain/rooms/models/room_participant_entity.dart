@@ -5,12 +5,12 @@ class RoomParticipantEntity extends Equatable {
   final String userId;
   final String displayName;
 
-  final String? selectedValue;
+  final String? selectedCard;
 
   const RoomParticipantEntity({
     required this.userId,
     required this.displayName,
-    required this.selectedValue,
+    required this.selectedCard,
   });
 
   factory RoomParticipantEntity.fromUser(UserEntity user) {
@@ -18,7 +18,7 @@ class RoomParticipantEntity extends Equatable {
     return RoomParticipantEntity(
       userId: user.id,
       displayName: user.displayName!,
-      selectedValue: null,
+      selectedCard: null,
     );
   }
 

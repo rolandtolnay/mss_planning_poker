@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../common/loading_scaffold.dart';
 import '../room_selector/room_selector_dialog.dart';
-import 'room_provider.dart';
+import 'room_state_notifier.dart';
 import 'widgets/poker_card_grid.dart';
 import 'widgets/room_participants_list.dart';
 
@@ -20,16 +20,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(roomProvider.notifier).fetchRoomForUserId(widget.userId);
+    ref.read(roomStateProvider.notifier).fetchRoomForUserId(widget.userId);
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<RoomProviderState>(roomProvider, (_, state) {
+    ref.listen<RoomState>(roomStateProvider, (_, state) {
       _showRoomSelectorIfNoRoomFound(state);
     });
 
-    final state = ref.watch(roomProvider);
+    final state = ref.watch(roomStateProvider);
     return state.maybeWhen(
       orElse: () => LoadingScaffold(),
       completed: (room) {
@@ -54,19 +54,19 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  void _showRoomSelectorIfNoRoomFound(RoomProviderState state) {
+  void _showRoomSelectorIfNoRoomFound(RoomState state) {
     state.whenOrNull(completed: (room) {
       if (room == null) {
         WidgetsBinding.instance?.addPostFrameCallback((_) async {
           final room = await RoomSelectorDialog.show(context);
-          if (room != null) ref.read(roomProvider.notifier).joinRoom(room);
+          if (room != null) ref.read(roomStateProvider.notifier).joinRoom(room);
         });
       }
     });
   }
 
   Future<void> _onLeaveRoomPressed(String roomId, WidgetRef ref) async {
-    final provider = ref.read(roomProvider.notifier);
+    final provider = ref.read(roomStateProvider.notifier);
     provider.leaveRoomWithId(roomId, userId: widget.userId);
   }
 }

@@ -10,10 +10,10 @@ class RoomModel {
   final String id;
   final String name;
 
-  final bool showingValues;
+  final bool showingCards;
   final List<String> participantIds;
 
-  RoomModel(this.id, this.name, this.showingValues, this.participantIds);
+  RoomModel(this.id, this.name, this.showingCards, this.participantIds);
 
   factory RoomModel.fromJson(Map<String, dynamic> json) =>
       _$RoomModelFromJson(json);
@@ -23,7 +23,7 @@ class RoomModel {
   factory RoomModel.fromEntity(RoomEntity entity) => RoomModel(
         entity.id,
         entity.name,
-        entity.showingValues,
+        entity.showingCards,
         entity.participants.map((e) => e.userId).toList(),
       );
 

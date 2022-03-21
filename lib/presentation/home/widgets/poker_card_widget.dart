@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/rooms/models/poker_card.dart';
+
 class PokerCardWidget extends StatelessWidget {
-  final String value;
-  final ValueChanged<String> onTapped;
+  final PokerCard card;
+  final ValueChanged<PokerCard> onTapped;
   final bool highlighted;
 
   const PokerCardWidget({
-    required this.value,
+    required this.card,
     required this.onTapped,
     this.highlighted = false,
     Key? key,
@@ -28,10 +30,10 @@ class PokerCardWidget extends StatelessWidget {
           ),
         ),
         child: Text(
-          value,
+          card,
           style: textTheme.subtitle1?.copyWith(color: colorScheme.onSecondary),
         ),
-        onPressed: () => onTapped(value),
+        onPressed: () => onTapped(card),
       ),
     );
   }
