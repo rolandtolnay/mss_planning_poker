@@ -57,8 +57,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     _buildShowEstimatesButton(room)
                   ],
                 ),
-                const SizedBox(height: 8.0),
-                PokerCardGrid()
+                const SizedBox(height: 16.0),
+                PokerCardGrid(),
+                const SizedBox(height: 24.0),
               ],
             ),
           ),

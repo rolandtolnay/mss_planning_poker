@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
 import 'injectable/injectable.dart';
@@ -24,10 +26,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'mss Planning Poker',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
+      theme: FlexThemeData.light(
+        scheme: FlexScheme.bahamaBlue,
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
       ),
+      darkTheme: FlexThemeData.dark(
+        scheme: FlexScheme.bahamaBlue,
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+      ),
+      themeMode: ThemeMode.dark,
       home: const AuthWidget(),
     );
   }

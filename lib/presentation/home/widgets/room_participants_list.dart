@@ -46,19 +46,17 @@ class RoomParticipantsList extends ConsumerWidget {
 
           final valueWidget = room.showingCards
               ? Text(user.selectedCard ?? '-', style: textTheme.headline5)
-              : SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: Icon(
-                      user.selectedCard == null
-                          ? Icons.question_mark
-                          : Icons.done,
-                      size: user.selectedCard == null ? 24 : 32),
-                );
+              : Icon(
+                  user.selectedCard == null ? Icons.question_mark : Icons.done,
+                  size: user.selectedCard == null ? 24 : 32);
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
             title: Text(user.displayName, style: textTheme.headline6),
-            trailing: valueWidget,
+            trailing: SizedBox(
+              width: 40,
+              height: 40,
+              child: Center(child: valueWidget),
+            ),
           );
         },
       ),

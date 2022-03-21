@@ -55,39 +55,39 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
 
     final nameInput = TextField(
       controller: _nameController,
-      decoration: InputDecoration(hintText: 'Display name'),
+      decoration: InputDecoration(hintText: 'YOUR NAME'),
       onChanged: (_) => setState(() {}),
     );
     final newRoomButton = RectangularButton(
-      title: 'Create new room',
+      title: 'CREATE NEW ROOM',
       enabled: _createEnabled,
       onPressed: _onCreateRoomTapped,
     );
     final joinErrorText = state.mapOrNull(error: (s) => s.errorMessage);
     final joinRoomInput = SizedBox(
-      width: 120,
+      width: 160,
       child: TextField(
         controller: _roomController,
         decoration: InputDecoration(
-          hintText: 'Room number',
+          hintText: 'ROOM NUMBER',
           errorText: joinErrorText,
         ),
         onChanged: (_) => setState(() {}),
       ),
     );
     final joinRoomButton = RectangularButton(
-      title: 'Join existing',
+      title: 'JOIN EXISTING',
       enabled: _joinEnabled,
       onPressed: _onJoinRoomTapped,
     );
 
     return CommonDialog(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 24.0),
             nameInput,
             const SizedBox(height: 16.0),
             LoadableWidget(
@@ -95,12 +95,13 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(height: 32.0),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       joinRoomInput,
                       const SizedBox(width: 16),
-                      joinRoomButton,
+                      Expanded(child: joinRoomButton),
                     ],
                   ),
                   const SizedBox(height: 8.0),
