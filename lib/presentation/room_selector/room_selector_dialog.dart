@@ -64,16 +64,13 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
       onPressed: _onCreateRoomTapped,
     );
     final joinErrorText = state.mapOrNull(error: (s) => s.errorMessage);
-    final joinRoomInput = SizedBox(
-      width: 160,
-      child: TextField(
-        controller: _roomController,
-        decoration: InputDecoration(
-          hintText: 'ROOM NUMBER',
-          errorText: joinErrorText,
-        ),
-        onChanged: (_) => setState(() {}),
+    final joinRoomInput = TextField(
+      controller: _roomController,
+      decoration: InputDecoration(
+        hintText: 'ROOM NR.',
+        errorText: joinErrorText,
       ),
+      onChanged: (_) => setState(() {}),
     );
     final joinRoomButton = RectangularButton(
       title: 'JOIN EXISTING',
@@ -99,9 +96,9 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      joinRoomInput,
+                      Expanded(child: joinRoomInput, flex: 5),
                       const SizedBox(width: 16),
-                      Expanded(child: joinRoomButton),
+                      Expanded(child: joinRoomButton, flex: 7),
                     ],
                   ),
                   const SizedBox(height: 8.0),
