@@ -54,6 +54,7 @@ class RoomStateNotifier extends StateNotifier<RoomState> {
     final room = state.mapOrNull(completed: (state) => state.room);
     if (room == null) return;
     await _pcpRepository.resetCards(roomId: room.id);
+    await _roomRepository.showCards(false, roomId: room.id);
   }
 }
 

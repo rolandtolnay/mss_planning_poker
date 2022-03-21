@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mss_planning_poker/presentation/common/max_width_container.dart';
+import 'package:mss_planning_poker/presentation/extensions/build_context_ext_screen_size.dart';
 
 import '../../../domain/rooms/models/room_entity.dart';
 import '../../../domain/rooms/room_repository.dart';
@@ -30,23 +32,36 @@ class RoomParticipantsList extends ConsumerWidget {
 
   Center _buildSpinner() => const Center(child: CircularProgressIndicator());
 
-  ListView _buildListView(RoomEntity room, BuildContext context) {
+  Widget _buildListView(RoomEntity room, BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      itemCount: room.participants.length,
-      itemBuilder: (_, index) {
-        final user = room.participants[index];
+    return MaxWidthContainer(
+      maxWidth: kPhoneWidth,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16.0),
+        itemCount: room.participants.length,
+        itemBuilder: (_, index) {
+          final user = room.participants[index];
 
-        final valueText =
-            room.showingCards ? user.selectedCard ?? '-' : 'hidden';
-        return ListTile(
-          title: Text(user.displayName),
-          trailing: Text(valueText, style: textTheme.headline6),
-        );
-      },
+          final valueWidget = room.showingCards
+              ? Text(user.selectedCard ?? '-', style: textTheme.headline5)
+              : SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: Icon(
+                      user.selectedCard == null
+                          ? Icons.question_mark
+                          : Icons.done,
+                      size: user.selectedCard == null ? 24 : 32),
+                );
+          return ListTile(
+            contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+            title: Text(user.displayName, style: textTheme.headline6),
+            trailing: valueWidget,
+          );
+        },
+      ),
     );
   }
 }

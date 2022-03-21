@@ -23,6 +23,6 @@ class _RootPageState extends ConsumerState<AuthWidget> {
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     if (user == null) return LoadingScaffold();
-    return HomePage(userId: user.id);
+    return HomePage(user: user);
   }
 }

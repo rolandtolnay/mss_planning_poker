@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mss_planning_poker/domain/auth/user_entity.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
 import '../common/loading_scaffold.dart';
@@ -9,9 +10,9 @@ import 'widgets/poker_card_grid.dart';
 import 'widgets/room_participants_list.dart';
 
 class HomePage extends ConsumerStatefulWidget {
-  final String userId;
+  final UserEntity user;
 
-  const HomePage({required this.userId, Key? key}) : super(key: key);
+  const HomePage({required this.user, Key? key}) : super(key: key);
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _HomePageState();
@@ -21,7 +22,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(roomStateProvider.notifier).fetchRoomForUserId(widget.userId);
+    ref.read(roomStateProvider.notifier).fetchRoomForUserId(widget.user.id);
   }
 
   @override
@@ -38,26 +39,28 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(room.name),
+            title: Text('Room ${room.name} (${widget.user.displayName})'),
             leading: IconButton(
-              icon: Icon(Icons.exit_to_app),
+              icon: Icon(Icons.logout),
               onPressed: () => _onLeaveRoomPressed(room.id, ref),
             ),
           ),
-          body: Column(
-            children: [
-              Expanded(child: RoomParticipantsList(roomId: room.id)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildResetButton(),
-                  const SizedBox(width: 16.0),
-                  _buildShowEstimatesButton(room)
-                ],
-              ),
-              const SizedBox(height: 8.0),
-              PokerCardGrid()
-            ],
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(child: RoomParticipantsList(roomId: room.id)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildResetButton(),
+                    const SizedBox(width: 16.0),
+                    _buildShowEstimatesButton(room)
+                  ],
+                ),
+                const SizedBox(height: 8.0),
+                PokerCardGrid()
+              ],
+            ),
           ),
         );
       },
@@ -65,14 +68,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   ElevatedButton _buildResetButton() {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: () => ref.read(roomStateProvider.notifier).resetCards(),
       style: ButtonStyle(
         fixedSize: MaterialStateProperty.resolveWith(
           (_) => Size.fromHeight(44),
         ),
       ),
-      child: Text('Reset'),
+      label: Text('RESET'),
+      icon: Icon(Icons.restart_alt),
     );
   }
 
@@ -83,8 +87,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             .select((room) => room.value?.showingCards));
         if (showing == null) return CircularProgressIndicator();
 
-        final text = showing ? 'Hide estimates' : 'Show estimates';
-        return ElevatedButton(
+        final text = showing ? 'HIDE ESTIMATES' : 'SHOW ESTIMATES';
+        return ElevatedButton.icon(
           onPressed: () {
             ref.read(roomStateProvider.notifier).showCards(!showing);
           },
@@ -93,7 +97,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               (_) => Size.fromHeight(44),
             ),
           ),
-          child: Text(text),
+          label: Text(text),
+          icon: Icon(showing ? Icons.visibility_off : Icons.visibility),
         );
       },
     );
@@ -112,6 +117,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _onLeaveRoomPressed(String roomId, WidgetRef ref) async {
     final provider = ref.read(roomStateProvider.notifier);
-    provider.leaveRoomWithId(roomId, userId: widget.userId);
+    provider.leaveRoomWithId(roomId, userId: widget.user.id);
   }
 }
