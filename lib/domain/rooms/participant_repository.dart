@@ -23,6 +23,8 @@ abstract class ParticipantRepository {
     required String roomId,
     required String userId,
   });
+
+  Future<DomainError?> resetCards({required String roomId});
 }
 
 @LazySingleton(as: ParticipantRepository)
@@ -83,6 +85,20 @@ class FirParticipantRepository implements ParticipantRepository {
       if (pcpSnap.data == null) return DomainError.noData('No user found');
       await pcpSnap.reference.update(selectedCard: value);
 
+      return null;
+    } catch (e, st) {
+      dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
+      return DomainError.unexpected('$e');
+    }
+  }
+
+  @override
+  Future<DomainError?> resetCards({required String roomId}) async {
+    try {
+      final snap = await _ref.participants(roomId).get();
+      for (final doc in snap.docs) {
+        doc.reference.update(selectedCard: null);
+      }
       return null;
     } catch (e, st) {
       dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);

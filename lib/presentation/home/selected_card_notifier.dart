@@ -5,26 +5,23 @@ import 'package:injectable/injectable.dart';
 
 import '../../domain/rooms/models/poker_card.dart';
 import '../../domain/rooms/participant_repository.dart';
-import '../auth/user_state_notifier.dart';
+import '../auth/user_notifier.dart';
 import 'room_state_notifier.dart';
 
 @Injectable()
 class SelectedCardNotifier extends StateNotifier<PokerCard?> {
   final ParticipantRepository _repository;
-  final Ref _ref;
 
   StreamSubscription? _listener;
 
-  SelectedCardNotifier(this._repository, @factoryParam Ref? ref)
-      : _ref = ref!,
-        super(null);
+  SelectedCardNotifier(this._repository) : super(null);
 
-  void listenOnChanges() {
+  void listenOnChanges(Reader read) {
     _listener?.cancel();
 
-    final roomProvider = _ref.read(roomStateProvider);
+    final roomProvider = read(roomStateProvider);
     final room = roomProvider.mapOrNull(completed: ((s) => s.room));
-    final userId = _ref.read(userProvider)?.id;
+    final userId = read(userProvider)?.id;
     if (room == null || userId == null) return;
 
     _listener = _repository
@@ -35,10 +32,10 @@ class SelectedCardNotifier extends StateNotifier<PokerCard?> {
     });
   }
 
-  Future selectCard(PokerCard? card) async {
-    final roomProvider = _ref.read(roomStateProvider);
+  Future selectCard(PokerCard? card, Reader read) async {
+    final roomProvider = read(roomStateProvider);
     final room = roomProvider.mapOrNull(completed: ((s) => s.room));
-    final userId = _ref.read(userProvider)?.id;
+    final userId = read(userProvider)?.id;
     if (room == null || userId == null) return;
 
     await _repository.selectCard(card, roomId: room.id, userId: userId);

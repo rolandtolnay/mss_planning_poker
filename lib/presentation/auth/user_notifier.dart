@@ -7,16 +7,16 @@ import 'package:mss_planning_poker/domain/auth/user_entity.dart';
 
 import '../../injectable/injectable.dart';
 
-final userProvider = StateNotifierProvider<UserStateNotifier, UserEntity?>(
-  (ref) => getIt<UserStateNotifier>(),
+final userProvider = StateNotifierProvider<UserNotifier, UserEntity?>(
+  (ref) => getIt<UserNotifier>(),
 );
 
 @Injectable()
-class UserStateNotifier extends StateNotifier<UserEntity?> {
+class UserNotifier extends StateNotifier<UserEntity?> {
   final AuthRepository _repository;
   late final StreamSubscription _listener;
 
-  UserStateNotifier(this._repository) : super(null) {
+  UserNotifier(this._repository) : super(null) {
     _listener = _repository.onAuthStateChanged.listen((user) {
       state = user;
     });

@@ -31,6 +31,7 @@ class RoomModel {
       RoomEntity(
         id: id,
         name: name,
+        showingCards: showingCards,
         participants: participants.map((e) => e.entity).toSet(),
       );
 }

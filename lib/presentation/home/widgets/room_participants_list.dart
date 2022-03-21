@@ -5,7 +5,7 @@ import '../../../domain/rooms/models/room_entity.dart';
 import '../../../domain/rooms/room_repository.dart';
 import '../../../injectable/injectable.dart';
 
-final _roomUpdateNotifier =
+final roomUpdateNotifier =
     StreamProvider.autoDispose.family<RoomEntity?, String>(
   (_, roomId) => getIt<RoomRepository>().onRoomUpdated(id: roomId),
 );
@@ -18,7 +18,7 @@ class RoomParticipantsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final onRoomUpdated = ref.watch(_roomUpdateNotifier(roomId));
+    final onRoomUpdated = ref.watch(roomUpdateNotifier(roomId));
     return onRoomUpdated.maybeWhen(
       orElse: _buildSpinner,
       data: (room) {

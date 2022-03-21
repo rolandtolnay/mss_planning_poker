@@ -13,6 +13,8 @@ import 'models/room_participant_entity.dart';
 import 'models/room_participant_model.dart';
 
 abstract class RoomRepository {
+  Stream<RoomEntity?> onRoomUpdated({required String id});
+
   Future<Either<DomainError, RoomEntity>> createRoom({
     required UserEntity admin,
   });
@@ -22,9 +24,9 @@ abstract class RoomRepository {
     required UserEntity participant,
   });
 
-  Stream<RoomEntity?> onRoomUpdated({required String id});
-
   Future<Either<DomainError, RoomEntity?>> findRoomForUserId(String userId);
+
+  Future<DomainError?> showCards(bool showingCards, {required String roomId});
 }
 
 @LazySingleton(as: RoomRepository)
@@ -117,6 +119,20 @@ class FirRoomRepository implements RoomRepository {
   void _validateDisplayName(UserEntity user) {
     if (user.displayName == null) {
       throw Exception('Display name cannot be empty.');
+    }
+  }
+
+  @override
+  Future<DomainError?> showCards(
+    bool showingCards, {
+    required String roomId,
+  }) async {
+    try {
+      await _ref.rooms.doc(roomId).update(showingCards: showingCards);
+      return null;
+    } catch (e, st) {
+      dev.log('[ERROR] ${e.toString()}', error: e, stackTrace: st);
+      return DomainError.unexpected('$e');
     }
   }
 }

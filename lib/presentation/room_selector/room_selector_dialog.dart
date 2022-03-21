@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
 import '../../injectable/injectable.dart';
-import '../auth/user_state_notifier.dart';
+import '../auth/user_notifier.dart';
 import '../common/common_dialog.dart';
 import '../common/loadable_widget.dart';
 import '../common/rectangular_button.dart';

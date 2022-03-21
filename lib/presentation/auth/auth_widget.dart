@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../common/loading_scaffold.dart';
 import '../home/home_page.dart';
-import 'user_state_notifier.dart';
+import 'user_notifier.dart';
 
 class AuthWidget extends ConsumerStatefulWidget {
   const AuthWidget({Key? key}) : super(key: key);

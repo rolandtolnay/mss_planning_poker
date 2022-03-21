@@ -43,6 +43,18 @@ class RoomStateNotifier extends StateNotifier<RoomState> {
   void joinRoom(RoomEntity entity) {
     state = RoomState.completed(entity);
   }
+
+  void showCards(bool showingCards) async {
+    final room = state.mapOrNull(completed: (state) => state.room);
+    if (room == null) return;
+    await _roomRepository.showCards(showingCards, roomId: room.id);
+  }
+
+  void resetCards() async {
+    final room = state.mapOrNull(completed: (state) => state.room);
+    if (room == null) return;
+    await _pcpRepository.resetCards(roomId: room.id);
+  }
 }
 
 @freezed

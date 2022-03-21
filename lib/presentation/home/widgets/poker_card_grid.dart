@@ -26,7 +26,7 @@ class _PokerCardGridState extends ConsumerState<PokerCardGrid> {
   @override
   void initState() {
     super.initState();
-    ref.read(_selectedCardProvider.notifier).listenOnChanges();
+    ref.read(_selectedCardProvider.notifier).listenOnChanges(ref.read);
   }
 
   @override
@@ -52,7 +52,7 @@ class _PokerCardGridState extends ConsumerState<PokerCardGrid> {
         card: card,
         highlighted: highlighted,
         onTapped: (_) {
-          ref.read(_selectedCardProvider.notifier).selectCard(card);
+          ref.read(_selectedCardProvider.notifier).selectCard(card, ref.read);
         },
       ),
     );
