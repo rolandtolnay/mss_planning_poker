@@ -43,12 +43,15 @@ class RoomParticipantsList extends ConsumerWidget {
         itemCount: room.participants.length,
         itemBuilder: (_, index) {
           final user = room.participants[index];
+          final didSelect = user.selectedCard != null;
 
           final valueWidget = room.showingCards
               ? Text(user.selectedCard ?? '-', style: textTheme.headline5)
               : Icon(
-                  user.selectedCard == null ? Icons.question_mark : Icons.done,
-                  size: user.selectedCard == null ? 24 : 32);
+                  didSelect ? Icons.done : Icons.question_mark,
+                  size: didSelect ? 32 : 24,
+                  color: didSelect ? null : theme.disabledColor,
+                );
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
             title: Text(user.displayName, style: textTheme.headline6),

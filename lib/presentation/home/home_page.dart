@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mss_planning_poker/domain/auth/user_entity.dart';
+import 'package:mss_planning_poker/presentation/common/max_width_container.dart';
+import 'package:mss_planning_poker/presentation/extensions/build_context_ext_screen_size.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
 import '../common/loading_scaffold.dart';
@@ -49,13 +51,15 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               children: [
                 Expanded(child: RoomParticipantsList(roomId: room.id)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildResetButton(),
-                    const SizedBox(width: 16.0),
-                    _buildShowEstimatesButton(room)
-                  ],
+                MaxWidthContainer(
+                  maxWidth: kPhoneWidth,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildResetButton(),
+                      _buildShowEstimatesButton(room)
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16.0),
                 PokerCardGrid(),
