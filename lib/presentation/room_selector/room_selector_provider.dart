@@ -50,7 +50,7 @@ class RoomSelectorProviderState with _$RoomSelectorProviderState {
   ) {
     return result.fold(
       (left) => RoomSelectorProviderState.error(left.errorMessage ?? ''),
-      RoomSelectorProviderState.completed,
+      (right) => RoomSelectorProviderState.completed(right),
     );
   }
 }

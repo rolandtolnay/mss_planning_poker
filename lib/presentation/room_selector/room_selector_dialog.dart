@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/rooms/models/room_entity.dart';
 import '../auth/auth_provider.dart';
-import '../auth/display_name_provider.dart';
 import '../common/common_dialog.dart';
 import '../common/loadable_widget.dart';
 import '../common/rectangular_button.dart';
@@ -18,7 +17,13 @@ class RoomSelectorDialog extends ConsumerStatefulWidget {
     );
   }
 
-  const RoomSelectorDialog({Key? key}) : super(key: key);
+  RoomSelectorDialog({Key? key}) : super(key: key);
+
+  final isLoading = StateProvider<bool>((ref) {
+    final state = ref.watch(roomSelectorProvider);
+    final loading = state.whenOrNull(loading: () => true);
+    return loading ?? false;
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -33,7 +38,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   void initState() {
     super.initState();
 
-    final displayName = ref.read(displayNameProvider);
+    final displayName = ref.read(authProvider)?.displayName;
     _nameController = TextEditingController(text: displayName);
     _roomController = TextEditingController();
   }
@@ -80,7 +85,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
             nameInput,
             const SizedBox(height: 16.0),
             LoadableWidget(
-              loading: state.mapOrNull(loading: (_) => true) ?? false,
+              loading: ref.watch(widget.isLoading),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -111,7 +116,6 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
   void _onCreateRoomTapped() async {
     await _updateDisplayName();
 
-    // TODO: Fix Listener updates after call is reached
     final user = ref.read(authProvider);
     if (user == null) return;
     await ref.read(roomSelectorProvider.notifier).createRoom(user: user);
@@ -138,6 +142,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
 
   Future<void> _updateDisplayName() async {
     final name = _nameController.text;
-    await ref.read(displayNameProvider.notifier).updateDisplayName(name);
+    ref.read(widget.isLoading.notifier).state = true;
+    await ref.read(authProvider.notifier).updateDisplayName(name);
   }
 }

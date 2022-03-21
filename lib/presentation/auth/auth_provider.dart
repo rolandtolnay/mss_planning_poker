@@ -24,6 +24,11 @@ class AuthProvider extends StateNotifier<UserEntity?> {
 
   Future<void> signInAnonymously() => _repository.signInAnonymously();
 
+  Future<void> updateDisplayName(String name) async {
+    await _repository.updateDisplayName(name);
+    state = _repository.currentUser;
+  }
+
   @override
   void dispose() {
     _listener.cancel();
