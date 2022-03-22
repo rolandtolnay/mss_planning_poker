@@ -28,11 +28,11 @@ class MyApp extends StatelessWidget {
       title: 'Scrum Planning Poker',
       theme: FlexThemeData.light(
         scheme: FlexScheme.bahamaBlue,
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
+        textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.light().textTheme),
       ),
       darkTheme: FlexThemeData.dark(
         scheme: FlexScheme.bahamaBlue,
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+        textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: ThemeMode.dark,
       home: const AuthWidget(),
