@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -36,7 +38,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
 
     final state = ref.watch(roomStateProvider);
     return state.maybeWhen(
@@ -54,6 +55,17 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
         );
+        final transparentLogo = Padding(
+          padding: const EdgeInsets.all(128),
+          child: Center(
+            child: Opacity(
+              opacity: 0.05,
+              child: SvgPicture.asset(
+                'assets/images/white_logo_no_background.svg',
+              ),
+            ),
+          ),
+        );
         return Scaffold(
           appBar: AppBar(
             title: Text('Room ${room.name} (${widget.user.displayName})'),
@@ -68,17 +80,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Expanded(
                   child: Stack(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(128),
-                        child: Center(
-                          child: Opacity(
-                            opacity: 0.05,
-                            child: SvgPicture.asset(
-                              'assets/images/white_logo_no_background.svg',
-                            ),
-                          ),
-                        ),
-                      ),
+                      transparentLogo,
                       RoomParticipantsList(roomId: room.id),
                     ],
                   ),
@@ -88,8 +90,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildResetButton(context),
-                      _buildShowEstimatesButton(room)
+                      _buildResetButton(room),
+                      _buildShowEstimatesButton(room.id)
                     ],
                   ),
                 ),
@@ -105,49 +107,57 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildResetButton(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return OutlinedButton.icon(
-      onPressed: () => ref.read(roomStateProvider.notifier).resetCards(),
-      style: ButtonStyle(
-        fixedSize: MaterialStateProperty.resolveWith(
-          (_) => Size.fromHeight(44),
+  Widget _buildResetButton(RoomEntity room) {
+    return Consumer(builder: (context, ref, __) {
+      final colorScheme = Theme.of(context).colorScheme;
+
+      final showing = ref.watch(roomUpdateNotifier(room.id)
+          .select((room) => room.value?.showingCards));
+      if (showing == null) return CircularProgressIndicator();
+
+      final side = showing
+          ? BorderSide(width: 2.0, color: colorScheme.primaryVariant)
+          : null;
+      return OutlinedButton.icon(
+        onPressed: () => ref.read(roomStateProvider.notifier).resetCards(),
+        style: OutlinedButton.styleFrom(
+          side: side,
+          primary: colorScheme.secondaryVariant,
+          fixedSize: Size.fromHeight(44),
         ),
-        foregroundColor: MaterialStateProperty.resolveWith(
-          // ignore: deprecated_member_use
-          (_) => colorScheme.secondaryVariant,
-        ),
-      ),
-      label: Text('RESET'),
-      icon: Icon(Icons.restart_alt),
-    );
+        label: Text('RESET'),
+        icon: Icon(Icons.restart_alt),
+      );
+    });
   }
 
-  Widget _buildShowEstimatesButton(RoomEntity room) {
+  Widget _buildShowEstimatesButton(String roomId) {
     return Consumer(
       builder: (context, ref, __) {
         final colorScheme = Theme.of(context).colorScheme;
 
-        final showing = ref.watch(roomUpdateNotifier(room.id)
-            .select((room) => room.value?.showingCards));
-        if (showing == null) return CircularProgressIndicator();
+        final room = ref
+            .watch(roomUpdateNotifier(roomId))
+            .mapOrNull(data: (data) => data.value);
+        if (room == null) return Container();
 
-        final text = showing ? 'HIDE ESTIMATES' : 'SHOW ESTIMATES';
+        final text = room.showingCards ? 'HIDE ESTIMATES' : 'SHOW ESTIMATES';
+        final side = room.participants.every((e) => e.selectedCard != null) &&
+                !room.showingCards
+            ? BorderSide(width: 2.0, color: colorScheme.primaryVariant)
+            : null;
         return OutlinedButton.icon(
           onPressed: () {
-            ref.read(roomStateProvider.notifier).showCards(!showing);
+            ref.read(roomStateProvider.notifier).showCards(!room.showingCards);
           },
-          style: ButtonStyle(
-            fixedSize: MaterialStateProperty.resolveWith(
-              (_) => Size.fromHeight(44),
-            ),
-            foregroundColor: MaterialStateProperty.resolveWith(
-              // ignore: deprecated_member_use
-              (_) => colorScheme.secondaryVariant,
-            ),
+          style: OutlinedButton.styleFrom(
+            side: side,
+            fixedSize: Size.fromHeight(44),
+            primary: colorScheme.secondaryVariant,
           ),
           label: Text(text),
-          icon: Icon(showing ? Icons.visibility_off : Icons.visibility),
+          icon:
+              Icon(room.showingCards ? Icons.visibility_off : Icons.visibility),
         );
       },
     );
