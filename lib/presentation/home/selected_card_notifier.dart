@@ -20,12 +20,12 @@ class SelectedCardNotifier extends StateNotifier<PokerCard?> {
     _listener?.cancel();
 
     final roomProvider = read(roomStateProvider);
-    final room = roomProvider.mapOrNull(completed: ((s) => s.room));
+    final roomId = roomProvider.mapOrNull(completed: ((s) => s.roomId));
     final userId = read(userProvider)?.id;
-    if (room == null || userId == null) return;
+    if (roomId == null || userId == null) return;
 
     _listener = _repository
-        .onParticipantChanged(userId, roomId: room.id)
+        .onParticipantChanged(userId, roomId: roomId)
         .listen((participant) {
       if (participant == null) return;
       state = participant.selectedCard;
@@ -34,11 +34,11 @@ class SelectedCardNotifier extends StateNotifier<PokerCard?> {
 
   Future selectCard(PokerCard? card, Reader read) async {
     final roomProvider = read(roomStateProvider);
-    final room = roomProvider.mapOrNull(completed: ((s) => s.room));
+    final roomId = roomProvider.mapOrNull(completed: ((s) => s.roomId));
     final userId = read(userProvider)?.id;
-    if (room == null || userId == null) return;
+    if (roomId == null || userId == null) return;
 
-    await _repository.selectCard(card, roomId: room.id, userId: userId);
+    await _repository.selectCard(card, roomId: roomId, userId: userId);
   }
 
   @override

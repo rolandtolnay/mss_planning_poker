@@ -27,7 +27,7 @@ class RoomStateNotifier extends StateNotifier<RoomState> {
     final result = await _roomRepository.findRoomForUserId(userId);
     state = result.fold(
       (left) => RoomState.error(left.errorMessage ?? ''),
-      (right) => RoomState.completed(right),
+      (right) => RoomState.completed(right?.id),
     );
   }
 
@@ -41,20 +41,20 @@ class RoomStateNotifier extends StateNotifier<RoomState> {
   }
 
   void joinRoom(RoomEntity entity) {
-    state = RoomState.completed(entity);
+    state = RoomState.completed(entity.id);
   }
 
   void showCards(bool showingCards) async {
-    final room = state.mapOrNull(completed: (state) => state.room);
-    if (room == null) return;
-    await _roomRepository.showCards(showingCards, roomId: room.id);
+    final roomId = state.mapOrNull(completed: (state) => state.roomId);
+    if (roomId == null) return;
+    await _roomRepository.showCards(showingCards, roomId: roomId);
   }
 
   void resetCards() async {
-    final room = state.mapOrNull(completed: (state) => state.room);
-    if (room == null) return;
-    await _pcpRepository.resetCards(roomId: room.id);
-    await _roomRepository.showCards(false, roomId: room.id);
+    final roomId = state.mapOrNull(completed: (state) => state.roomId);
+    if (roomId == null) return;
+    await _pcpRepository.resetCards(roomId: roomId);
+    await _roomRepository.showCards(false, roomId: roomId);
   }
 }
 
@@ -63,7 +63,7 @@ class RoomState with _$RoomState {
   const RoomState._();
   const factory RoomState.loading() = _Loading;
   const factory RoomState.error(String errorText) = _Error;
-  const factory RoomState.completed(RoomEntity? room) = _Completed;
+  const factory RoomState.completed(String? roomId) = _Completed;
 
   factory RoomState.fromError(DomainError? error) {
     if (error == null) return RoomState.completed(null);

@@ -38,9 +38,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final state = ref.watch(roomStateProvider);
     return state.maybeWhen(
       orElse: () => const LoadingScaffold(),
-      completed: (room) {
-        if (room == null) return const Scaffold();
-        return _buildHomePage(room, context);
+      completed: (roomId) {
+        if (roomId == null) return const Scaffold();
+        return _buildHomePage(roomId, context);
       },
     );
   }
@@ -56,7 +56,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
-  Widget _buildHomePage(RoomEntity room, BuildContext context) {
+  Widget _buildHomePage(String roomId, BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
@@ -83,13 +83,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Room ${room.name} (${widget.user.displayName})'),
-        leading: IconButton(
-          icon: Icon(Icons.logout),
-          onPressed: () => _onLeaveRoomPressed(room.id, ref),
-        ),
-      ),
+      appBar: _buildAppBar(roomId, context),
       body: SafeArea(
         child: Column(
           children: [
@@ -97,7 +91,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Stack(
                 children: [
                   transparentLogo,
-                  RoomParticipantsList(roomId: room.id),
+                  RoomParticipantsList(roomId: roomId),
                 ],
               ),
             ),
@@ -106,8 +100,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildResetButton(room),
-                  _buildShowEstimatesButton(room.id)
+                  _buildResetButton(roomId),
+                  _buildShowEstimatesButton(roomId)
                 ],
               ),
             ),
@@ -121,9 +115,28 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildResetButton(RoomEntity room) {
+  AppBar _buildAppBar(String roomId, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AppBar(
+      title: Consumer(builder: (_, ref, __) {
+        final roomName = ref.watch(
+            roomUpdateNotifier(roomId).select((room) => room.value?.name));
+        return Text('Room ${roomName ?? ''} (${widget.user.displayName})');
+      }),
+      leadingWidth: 160,
+      leading: TextButton.icon(
+        onPressed: () => _onLeaveRoomPressed(roomId, ref),
+        icon: Icon(Icons.logout),
+        label: Text('LEAVE ROOM'),
+        // ignore: deprecated_member_use
+        style: TextButton.styleFrom(primary: colorScheme.secondaryVariant),
+      ),
+    );
+  }
+
+  Widget _buildResetButton(String roomId) {
     return Consumer(builder: (context, ref, __) {
-      final showing = ref.watch(roomUpdateNotifier(room.id)
+      final showing = ref.watch(roomUpdateNotifier(roomId)
           .select((room) => room.value?.showingCards));
       if (showing == null) return CircularProgressIndicator();
 

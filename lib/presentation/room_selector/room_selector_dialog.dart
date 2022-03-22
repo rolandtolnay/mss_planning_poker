@@ -85,13 +85,13 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 32.0),
             SvgPicture.asset(
               'assets/images/white_logo_no_background.svg',
               height: 128,
               width: 128,
             ),
-            const SizedBox(height: 32.0),
+            const SizedBox(height: 48.0),
             nameInput,
             const SizedBox(height: 16.0),
             LoadableWidget(
@@ -99,7 +99,6 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 16.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
