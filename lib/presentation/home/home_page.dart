@@ -34,12 +34,26 @@ class _HomePageState extends ConsumerState<HomePage> {
       _showRoomSelectorIfNoRoomFound(state);
     });
 
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     final state = ref.watch(roomStateProvider);
     return state.maybeWhen(
       orElse: () => LoadingScaffold(),
       completed: (room) {
         if (room == null) return Scaffold();
 
+        final creator = Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 4, right: 8),
+            child: Text(
+              'by roland tolnay',
+              style: textTheme.overline?.copyWith(color: theme.disabledColor),
+            ),
+          ),
+        );
         return Scaffold(
           appBar: AppBar(
             title: Text('Room ${room.name} (${widget.user.displayName})'),
@@ -82,6 +96,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(height: 16.0),
                 PokerCardGrid(),
                 const SizedBox(height: 24.0),
+                creator
               ],
             ),
           ),
