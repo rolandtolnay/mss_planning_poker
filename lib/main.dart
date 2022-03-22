@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'mss Planning Poker',
+      title: 'Scrum Planning Poker',
       theme: FlexThemeData.light(
         scheme: FlexScheme.bahamaBlue,
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),

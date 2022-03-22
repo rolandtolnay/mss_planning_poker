@@ -99,3 +99,5 @@
 
 # Firebase
 lib/firebase_options.dart
+.firebase/*
+.firebaserc
