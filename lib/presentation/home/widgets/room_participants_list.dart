@@ -49,6 +49,7 @@ class RoomParticipantsList extends ConsumerWidget {
               ? Text(user.selectedCard ?? '-', style: textTheme.headline5)
               : Icon(
                   didSelect ? Icons.done : Icons.question_mark,
+                  key: ValueKey(didSelect ? 1 : 0),
                   size: didSelect ? 32 : 24,
                   color: didSelect ? null : theme.disabledColor,
                 );
@@ -58,7 +59,18 @@ class RoomParticipantsList extends ConsumerWidget {
             trailing: SizedBox(
               width: 40,
               height: 40,
-              child: Center(child: valueWidget),
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  switchOutCurve: Curves.easeOutCubic,
+                  switchInCurve: Curves.easeInCubic,
+                  transitionBuilder: (widget, animation) => ScaleTransition(
+                    scale: animation,
+                    child: widget,
+                  ),
+                  child: valueWidget,
+                ),
+              ),
             ),
           );
         },

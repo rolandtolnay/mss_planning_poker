@@ -7,7 +7,7 @@ import '../selected_card_notifier.dart';
 import 'poker_card_widget.dart';
 
 final _cardProvider = Provider<List<PokerCard>>((ref) {
-  return ['?', '1', '2', '3', '5', '8', '13'];
+  return ['?', '1', '2', '3', '5', '8', '13', '20'];
 });
 
 final _selectedCardProvider =
