@@ -26,7 +26,10 @@ class PokerCardWidget extends StatelessWidget {
       child: TextButton(
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith(
-            (_) => highlighted ? colorScheme.secondary : theme.primaryColorDark,
+            (_) => highlighted
+                ? colorScheme.secondary
+                // ignore: deprecated_member_use
+                : colorScheme.primaryVariant,
           ),
         ),
         child: Text(

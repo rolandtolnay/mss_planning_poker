@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mss_planning_poker/domain/auth/user_entity.dart';
 import 'package:mss_planning_poker/presentation/common/max_width_container.dart';
 import 'package:mss_planning_poker/presentation/extensions/build_context_ext_screen_size.dart';
@@ -50,7 +51,24 @@ class _HomePageState extends ConsumerState<HomePage> {
           body: SafeArea(
             child: Column(
               children: [
-                Expanded(child: RoomParticipantsList(roomId: room.id)),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(128),
+                        child: Center(
+                          child: Opacity(
+                            opacity: 0.05,
+                            child: SvgPicture.asset(
+                              'assets/images/white_logo_no_background.svg',
+                            ),
+                          ),
+                        ),
+                      ),
+                      RoomParticipantsList(roomId: room.id),
+                    ],
+                  ),
+                ),
                 MaxWidthContainer(
                   maxWidth: kPhoneWidth,
                   child: Row(

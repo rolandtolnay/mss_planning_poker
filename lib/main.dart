@@ -24,14 +24,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final flexSchemeColor = FlexSchemeColor.from(
+      primary: Color(0xff0075c5),
+      secondary: Color(0xffE57C4A),
+      primaryVariant: Color(0xff005792),
+      secondaryVariant: Color(0xff0094f8),
+    );
     return MaterialApp(
       title: 'Scrum Planning Poker',
       theme: FlexThemeData.light(
-        scheme: FlexScheme.bahamaBlue,
+        colors: flexSchemeColor,
         textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.light().textTheme),
       ),
       darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.bahamaBlue,
+        colors: flexSchemeColor,
         textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: ThemeMode.dark,
