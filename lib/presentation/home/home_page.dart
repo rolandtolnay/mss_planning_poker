@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
+import 'package:mss_planning_poker/presentation/extensions/compact_map.dart';
+import 'package:scidart/numdart.dart';
 import '../../domain/auth/user_entity.dart';
 import '../common/max_width_container.dart';
 import '../extensions/build_context_ext_screen_size.dart';
@@ -87,6 +90,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 16.0),
             Expanded(
               child: Stack(
                 children: [
@@ -95,17 +99,29 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ],
               ),
             ),
+            const SizedBox(height: 32.0),
             MaxWidthContainer(
               maxWidth: kPhoneWidth,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _buildResetButton(roomId),
-                  _buildShowEstimatesButton(roomId)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _buildMedian(roomId, context),
+                        const SizedBox(height: 16.0),
+                        _buildShowEstimatesButton(roomId),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8.0)
                 ],
               ),
             ),
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 32.0),
             PokerCardGrid(),
             const SizedBox(height: 16.0),
             creator
@@ -113,6 +129,49 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
       ),
     );
+  }
+
+  Widget _buildMedian(String roomId, BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return Consumer(builder: (context, ref, _) {
+      final room = ref
+          .watch(roomUpdateNotifier(roomId))
+          .mapOrNull(data: (data) => data.value);
+      if (room == null) return Container();
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            'median: ',
+            style: textTheme.headline6?.copyWith(color: theme.disabledColor),
+          ),
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                switchOutCurve: Curves.easeOutCubic,
+                switchInCurve: Curves.easeInCubic,
+                transitionBuilder: (widget, animation) => ScaleTransition(
+                  scale: animation,
+                  child: widget,
+                ),
+                child: room.showingCards
+                    ? Text(
+                        '${room.participants.selectedMedian}',
+                        style: textTheme.headline5,
+                      )
+                    : Icon(Icons.question_mark, color: theme.disabledColor),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   AppBar _buildAppBar(String roomId, BuildContext context) {
@@ -177,5 +236,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _onLeaveRoomPressed(String roomId, WidgetRef ref) async {
     final provider = ref.read(roomStateProvider.notifier);
     provider.leaveRoomWithId(roomId, userId: widget.user.id);
+  }
+}
+
+extension on Iterable<RoomParticipantEntity> {
+  int get selectedMedian {
+    final cards = compactMap(
+      (p) => p.selectedCard != null ? double.tryParse(p.selectedCard!) : null,
+    ).toList();
+    return cards.isNotEmpty ? median(Array(cards)).round() : 0;
   }
 }

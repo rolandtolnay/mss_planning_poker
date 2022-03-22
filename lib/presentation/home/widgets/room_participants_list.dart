@@ -39,7 +39,6 @@ class RoomParticipantsList extends ConsumerWidget {
     return MaxWidthContainer(
       maxWidth: kPhoneWidth,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16.0),
         itemCount: room.participants.length,
         itemBuilder: (_, index) {
           final user = room.participants[index];
