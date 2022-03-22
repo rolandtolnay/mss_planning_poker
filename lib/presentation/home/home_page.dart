@@ -74,7 +74,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildResetButton(),
+                      _buildResetButton(context),
                       _buildShowEstimatesButton(room)
                     ],
                   ),
@@ -90,12 +90,17 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  ElevatedButton _buildResetButton() {
-    return ElevatedButton.icon(
+  Widget _buildResetButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return OutlinedButton.icon(
       onPressed: () => ref.read(roomStateProvider.notifier).resetCards(),
       style: ButtonStyle(
         fixedSize: MaterialStateProperty.resolveWith(
           (_) => Size.fromHeight(44),
+        ),
+        foregroundColor: MaterialStateProperty.resolveWith(
+          // ignore: deprecated_member_use
+          (_) => colorScheme.secondaryVariant,
         ),
       ),
       label: Text('RESET'),
@@ -105,19 +110,25 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildShowEstimatesButton(RoomEntity room) {
     return Consumer(
-      builder: (_, ref, __) {
+      builder: (context, ref, __) {
+        final colorScheme = Theme.of(context).colorScheme;
+
         final showing = ref.watch(roomUpdateNotifier(room.id)
             .select((room) => room.value?.showingCards));
         if (showing == null) return CircularProgressIndicator();
 
         final text = showing ? 'HIDE ESTIMATES' : 'SHOW ESTIMATES';
-        return ElevatedButton.icon(
+        return OutlinedButton.icon(
           onPressed: () {
             ref.read(roomStateProvider.notifier).showCards(!showing);
           },
           style: ButtonStyle(
             fixedSize: MaterialStateProperty.resolveWith(
               (_) => Size.fromHeight(44),
+            ),
+            foregroundColor: MaterialStateProperty.resolveWith(
+              // ignore: deprecated_member_use
+              (_) => colorScheme.secondaryVariant,
             ),
           ),
           label: Text(text),
