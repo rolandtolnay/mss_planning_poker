@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:mss_planning_poker/domain/rooms/models/room_participant_entity.dart';
-import 'package:mss_planning_poker/presentation/extensions/compact_map.dart';
+import 'package:mss_planning_poker/main.dart';
 import 'package:scidart/numdart.dart';
-import '../../domain/auth/user_entity.dart';
-import '../common/max_width_container.dart';
-import '../extensions/build_context_ext_screen_size.dart';
 
-import '../../domain/rooms/models/room_entity.dart';
+import '../../domain/auth/user_entity.dart';
+import '../../domain/rooms/models/room_participant_entity.dart';
 import '../common/accentuable_button.dart';
 import '../common/loading_scaffold.dart';
+import '../common/max_width_container.dart';
+import '../extensions/build_context_ext_screen_size.dart';
+import '../extensions/compact_map.dart';
 import '../room_selector/room_selector_dialog.dart';
 import 'room_state_notifier.dart';
 import 'widgets/poker_card_grid.dart';
@@ -176,6 +176,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   AppBar _buildAppBar(String roomId, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return AppBar(
       title: Consumer(builder: (_, ref, __) {
         final roomName = ref.watch(
@@ -187,9 +189,28 @@ class _HomePageState extends ConsumerState<HomePage> {
         onPressed: () => _onLeaveRoomPressed(roomId, ref),
         icon: Icon(Icons.logout),
         label: Text('LEAVE ROOM'),
-        // ignore: deprecated_member_use
-        style: TextButton.styleFrom(primary: colorScheme.secondaryVariant),
+        style: TextButton.styleFrom(
+          // ignore: deprecated_member_use
+          primary: isDarkMode ? colorScheme.secondaryVariant : Colors.white,
+        ),
       ),
+      actions: [
+        Consumer(builder: (_, ref, __) {
+          return TextButton.icon(
+            onPressed: () {
+              ref
+                  .watch(themeModeProvider.notifier)
+                  .setThemeMode(isDarkMode ? ThemeMode.light : ThemeMode.dark);
+            },
+            icon: Icon(isDarkMode ? Icons.bedtime : Icons.brightness_5),
+            label: Text(isDarkMode ? 'DARK THEME' : 'LIGHT THEME'),
+            style: TextButton.styleFrom(
+              // ignore: deprecated_member_use
+              primary: isDarkMode ? colorScheme.secondaryVariant : Colors.white,
+            ),
+          );
+        })
+      ],
     );
   }
 

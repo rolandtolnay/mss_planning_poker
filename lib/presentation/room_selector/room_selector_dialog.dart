@@ -79,6 +79,7 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
       onPressed: _onJoinRoomTapped,
     );
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return CommonDialog(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -87,7 +88,9 @@ class _RoomSelectorDialogState extends ConsumerState<RoomSelectorDialog> {
           children: [
             const SizedBox(height: 32.0),
             SvgPicture.asset(
-              'assets/images/white_logo_no_background.svg',
+              isDarkMode
+                  ? 'assets/images/white_logo_no_background.svg'
+                  : 'assets/images/black_logo_no_background.svg',
               height: 128,
               width: 128,
             ),
